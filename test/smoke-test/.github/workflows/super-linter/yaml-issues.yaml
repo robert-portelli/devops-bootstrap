@@ -1,0 +1,13 @@
+name: Example Workflow
+on: 
+  push: null
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Lint this file!"  
+
+# issues:
+#    - null truthy value in push (not true or false).
+#    - Trailing space at the end of the run line.
+#    - Missing indentation consistency (e.g., jobs.example vs. jobs).
