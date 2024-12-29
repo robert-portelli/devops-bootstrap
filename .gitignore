@@ -1,3 +1,12 @@
+# Exclude all files under the pre-commit-config smoke test directory
+test/smoke-test/pre-commit-config/**
+
+# Include the manage-smoke-tests.sh script
+!test/smoke-test/pre-commit-config/manage-smoke-tests.sh
+
+# Include all create-smoke-tests.sh scripts within the directory
+!test/smoke-test/pre-commit-config/**/create-smoke-tests.sh
+
 # Exclude backup files
 *~ #nano backups
 *.bak
@@ -37,6 +46,7 @@ logrotate.d/*
 pacman.d/*
 logrotate.d/*
 systemd/*
+
 tmpfiles.d/*
 udev/*
 bash.bash_logout
