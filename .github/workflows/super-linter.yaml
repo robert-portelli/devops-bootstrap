@@ -47,4 +47,5 @@ jobs:
           VALIDATE_PYTHON_RUFF: true
           VALIDATE_PYTHON_MYPY: true
           VALIDATE_MARKDOWN: true
+          FILTER_REGEX_EXCLUDE: ".*test/smoke-test/.github/workflows/super-linter/.*"
 
