@@ -1,0 +1,8 @@
+<<<<<<< HEAD
+This is conflicting text from the main branch.
+=======
+This is conflicting text from the feature branch.
+>>>>>>>
+
+# issues:
+#    - Unresolved Git merge conflict markers (<<<<<<<, =======, >>>>>>>).
