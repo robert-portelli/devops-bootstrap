@@ -31,8 +31,6 @@ log_message() {
     echo "$message" >> "$log_file"
 }
 
-alias lm="log_message"
-
 create_smoke_tests() {
     for REPO in "${SUPPORTED_REPOS[@]}"; do
         local script="test/smoke-test/pre-commit-config/$REPO/create-smoke-tests.sh"
@@ -69,6 +67,7 @@ main() {
     trap teardown EXIT # avoid unnecessarily running teardown if CURRENT_BRANCH is unset
 
     log_file=$(log_setup) || { echo "log_setup() failed."; exit 1; }
+    alias lm="log_message"
     lm "=== Starting Smoke Tests ==="
 
     SUPPORTED_REPOS=(
