@@ -4,56 +4,93 @@
 # Description: Automates the creation, staging, and testing of smoke tests for pre-commit hooks.
 # Supports multiple repositories dynamically defined in the SUPPORTED_REPOS array.
 
-# Array of supported repositories
-SUPPORTED_REPOS=(
-)
+log_setup() {
+    # Get the script's directory
+    local script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-# Function to create smoke tests
+    # Create directories for logs
+    local log_dir="${script_dir}/log"
+    local old_logs="${log_dir}/old"
+    mkdir -p "$log_dir" "$old_logs"
+
+    # Archive old logs
+    for file in "$log_dir"/*.log; do
+        [[ -f "$file" ]] &&  mv "$file" "$old_logs/"
+    done
+
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
+
+    # return the log_file
+    echo "${log_dir}/${timestamp}_smoke-test.log"
+}
+
+log_message() {
+    local message="$1"
+    echo "$message" >> "$log_file"
+}
+
+alias lm="log_message"
+
 create_smoke_tests() {
-    echo "Creating smoke tests..."
     for REPO in "${SUPPORTED_REPOS[@]}"; do
-        if [[ -x "test/smoke-test/pre-commit-config/$REPO/create-smoke-tests.sh" ]]; then
-            bash "test/smoke-test/pre-commit-config/$REPO/create-smoke-tests.sh"
-            echo "Created smoke tests for $REPO."
+        local script="test/smoke-test/pre-commit-config/$REPO/create-smoke-tests.sh"
+        if [[ -x "$script" ]]; then
+            bash "$script" && lm "Created smoke tests for $REPO."
         else
-            echo "Warning: create-smoke-tests.sh not found or not executable for $REPO."
+            lm "Warning: $script not found or not executable for $REPO."
         fi
     done
 }
 
-# Function to stage smoke tests
 stage_smoke_tests() {
-    echo "Staging smoke tests..."
     for REPO in "${SUPPORTED_REPOS[@]}"; do
-        git add --force "test/smoke-test/pre-commit-config/$REPO/"*
-        echo "Staged smoke tests for $REPO."
+        git add --force "test/smoke-test/pre-commit-config/$REPO/"* || lm "Failed to stage smoke tests for $REPO."
     done
 }
 
-# Save the current branch name
-CURRENT_BRANCH=$(git branch --show-current)
+teardown() {
+    if [[ -z "$CURRENT_BRANCH" ]]; then
+        lm "No cleanup necessary; exiting."
+        exit
+    fi
+    # Return to the original branch
+    git checkout "$CURRENT_BRANCH" ||  { lm "Failed to switch to $CURRENT_BRANCH"; return 1; }
 
-# Create a new branch for smoke testing
-TEST_BRANCH="smoke-test-$(date +%s)"
-echo "Switching to a new branch: $TEST_BRANCH"
-git checkout -b "$TEST_BRANCH"
+    # Delete the smoke test branch
+    git branch -D "$TEST_BRANCH" || lm "Failed to delete "$TEST_BRANCH"
+    git push origin --delete "$TEST_BRANCH" || lm "No remote branch to delete."
+}
 
-# Create and stage smoke tests
-create_smoke_tests
-stage_smoke_tests
 
-if ! pre-commit run --all-files --verbose; then
-    echo "Pre-commit hooks failed. Review the output above for details."
-    exit 1
+main() {
+    CURRENT_BRANCH=$(git branch --show-current) || { echo "No git branch available."; exit 1; }
+    trap teardown EXIT # avoid unnecessarily running teardown if CURRENT_BRANCH is unset
+
+    log_file=$(log_setup) || { echo "log_setup() failed."; exit 1; }
+    lm "=== Starting Smoke Tests ==="
+
+    SUPPORTED_REPOS=(
+        # Add repository names here
+    )
+
+    if [[ ${#SUPPORTED_REPOS[@]} -eq 0 ]]; then
+        lm "No repositories to test; exiting."
+        exit 0
+    fi
+
+    # Create a new branch for smoke testing
+    TEST_BRANCH="smoke-test-$(date +%s)"
+    git checkout -b "$TEST_BRANCH" || { lm "Failed to switch to "$TEST_BRANCH"; exit 1; }
+
+    create_smoke_tests
+    stage_smoke_tests
+
+    pre-commit run --all-files --verbose || lm "pre-commit ran on smoke tests"
+    lm "=== Smoke Tests Complete ==="
+}
+
+# Check if the script is run directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
 fi
-
-# Return to the original branch
-echo "Returning to the original branch: $CURRENT_BRANCH"
-git checkout "$CURRENT_BRANCH"
-
-# Delete the smoke test branch
-echo "Deleting the smoke test branch: $TEST_BRANCH"
-git branch -D "$TEST_BRANCH"
-git push origin --delete "$TEST_BRANCH" || echo "No remote branch to delete."
-
-echo "Smoke test workflow complete."
