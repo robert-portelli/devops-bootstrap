@@ -2,7 +2,7 @@
 # Filename: test/smoke-test/pre-commit-config/pre-commit-repo/create-smoke-tests.sh
 # Description: Create smoke test files for the pre-commit-repo hooks
 
-BASE_DIR="test/smoke-test/pre-commit-config/pre-commit-repo"
+BASE_DIR="test/smoke-test/pre-commit-config/pre-commit-repo/smoke-tests"
 
 # Ensure the directory exists
 mkdir -p "$BASE_DIR"
