@@ -6,7 +6,8 @@
 
 log_setup() {
     # Get the script's directory
-    local script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    local script_dir
+    script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
     # Create directories for logs
     local log_dir="${script_dir}/log"
@@ -58,7 +59,7 @@ teardown() {
     git checkout "$CURRENT_BRANCH" ||  { lm "Failed to switch to $CURRENT_BRANCH"; return 1; }
 
     # Delete the smoke test branch
-    git branch -D "$TEST_BRANCH" || lm "Failed to delete "$TEST_BRANCH"
+    git branch -D "$TEST_BRANCH" || lm "Failed to delete $TEST_BRANCH"
     git push origin --delete "$TEST_BRANCH" || lm "No remote branch to delete."
 }
 
@@ -82,7 +83,7 @@ main() {
 
     # Create a new branch for smoke testing
     TEST_BRANCH="smoke-test-$(date +%s)"
-    git checkout -b "$TEST_BRANCH" || { lm "Failed to switch to "$TEST_BRANCH"; exit 1; }
+    git checkout -b "$TEST_BRANCH" || { lm "Failed to switch to $TEST_BRANCH"; exit 1; }
 
     create_smoke_tests
     stage_smoke_tests
