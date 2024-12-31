@@ -72,6 +72,7 @@ main() {
 
     SUPPORTED_REPOS=(
         # Add repository names here
+        "pre-commit-repo"
     )
 
     if [[ ${#SUPPORTED_REPOS[@]} -eq 0 ]]; then
