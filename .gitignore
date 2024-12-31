@@ -6,6 +6,7 @@ test/smoke-test/pre-commit-config/**
 
 # Include all create-smoke-tests.sh scripts within the directory
 !test/smoke-test/pre-commit-config/**/create-smoke-tests.sh
+#!test/smoke-test/pre-commit-config/pre-commit-repo/create-smoke-tests.sh
 
 # Exclude backup files
 *~ #nano backups

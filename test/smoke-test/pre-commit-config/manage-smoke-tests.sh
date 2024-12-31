@@ -6,7 +6,8 @@
 
 log_setup() {
     # Get the script's directory
-    local script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    local script_dir
+    script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
     # Create directories for logs
     local log_dir="${script_dir}/log"
@@ -29,8 +30,6 @@ log_message() {
     local message="$1"
     echo "$message" >> "$log_file"
 }
-
-alias lm="log_message"
 
 create_smoke_tests() {
     for REPO in "${SUPPORTED_REPOS[@]}"; do
@@ -58,7 +57,7 @@ teardown() {
     git checkout "$CURRENT_BRANCH" ||  { lm "Failed to switch to $CURRENT_BRANCH"; return 1; }
 
     # Delete the smoke test branch
-    git branch -D "$TEST_BRANCH" || lm "Failed to delete "$TEST_BRANCH"
+    git branch -D "$TEST_BRANCH" || lm "Failed to delete $TEST_BRANCH"
     git push origin --delete "$TEST_BRANCH" || lm "No remote branch to delete."
 }
 
@@ -68,10 +67,12 @@ main() {
     trap teardown EXIT # avoid unnecessarily running teardown if CURRENT_BRANCH is unset
 
     log_file=$(log_setup) || { echo "log_setup() failed."; exit 1; }
+    alias lm="log_message"
     lm "=== Starting Smoke Tests ==="
 
     SUPPORTED_REPOS=(
         # Add repository names here
+        "pre-commit-repo"
     )
 
     if [[ ${#SUPPORTED_REPOS[@]} -eq 0 ]]; then
@@ -81,7 +82,7 @@ main() {
 
     # Create a new branch for smoke testing
     TEST_BRANCH="smoke-test-$(date +%s)"
-    git checkout -b "$TEST_BRANCH" || { lm "Failed to switch to "$TEST_BRANCH"; exit 1; }
+    git checkout -b "$TEST_BRANCH" || { lm "Failed to switch to $TEST_BRANCH"; exit 1; }
 
     create_smoke_tests
     stage_smoke_tests
