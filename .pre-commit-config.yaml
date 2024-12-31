@@ -1,0 +1,19 @@
+---
+repos:
+  # ==================== General =========================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files  # avoid giant file commit accidents
+      - id: check-case-conflict  # avoid case sensitivity in file names
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: debug-statements
+      - id: double-quote-string-fixer
+      - id: name-tests-test  # follow pytest naming convention
+      - id: requirements-txt-fixer
+      - id: check-merge-conflict  # avoid lingering merge markers
+      - id: mixed-line-ending  # Use Unix line-endings to avoid big no-op CSV diffs.
+        args: [--fix=lf]
