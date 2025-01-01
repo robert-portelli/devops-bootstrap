@@ -61,8 +61,9 @@ create_smoke_tests() {
 }
 
 stage_smoke_tests() {
-    local smoke_tests="$1"
-    git add --force "$smoke_tests"/* || lm "Failed to stage smoke tests for $REPO."
+    local REPO="$1"
+    local PATH="${PATHS[smoke_tests]}""
+    git add --force "$PATH"/* || lm "Failed to stage smoke tests for $REPO."
 }
 
 teardown() {
