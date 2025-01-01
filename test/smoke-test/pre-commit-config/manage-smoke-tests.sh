@@ -104,7 +104,6 @@ main() {
 
     TEST_BRANCH="smoke-test-$(date +%s)"
     git checkout -b "$TEST_BRANCH" || { echo "Failed to switch to $TEST_BRANCH"; exit 1; }
-    alias lm="log_message"
 
     for REPO in "${SUPPORTED_REPOS[@]}"; do
             define_paths "$REPO" || { echo "path definitions failed for $REPO; skipping."; lm "path definitions failed for $REPO"; continue; }
@@ -120,5 +119,6 @@ main() {
 
 # Check if the script is run directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    alias lm="log_message"
     main
 fi
