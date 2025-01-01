@@ -36,7 +36,7 @@ log_rotate() {
 
     # Keep the youngest `old_logs_to_keep` logs and delete the rest
     local all_logs=("${PATHS[old_logs]}"/*.log)
-    if (( ${#all_logs[@]} > old_logs_to_keep )); then
+    if (( "${#all_logs[@]}" > old_logs_to_keep )); then
         # Sort logs by modification time (newest last) and remove the oldest
         ls -t "${PATHS[old_logs]}"/*.log | tail -n +$((old_logs_to_keep + 1)) | xargs rm -f
     fi
@@ -63,7 +63,7 @@ create_smoke_tests() {
 stage_smoke_tests() {
     # some hooks require files to be staged for analysis
     local REPO="$1"
-    local PATH="${PATHS[smoke_tests]}""
+    local PATH="${PATHS[smoke_tests]}"
     git add --force "$PATH"/* || lm "Failed to stage smoke tests for $REPO."
 }
 
@@ -93,7 +93,7 @@ main() {
         "pre-commit-repo"
     )
 
-    if [[ ${#SUPPORTED_REPOS[@]} -eq 0 ]]; then
+    if [[ "${#SUPPORTED_REPOS[@]}" -eq 0 ]]; then
         echo  "No repositories to test; exiting."
         exit 0
     fi
