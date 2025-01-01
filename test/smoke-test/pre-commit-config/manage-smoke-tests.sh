@@ -59,6 +59,7 @@ log_rotate() {
     # Move all logs from log_dir to old_logs
     for file in "${PATHS[log_dir]}"/*.log; do
         [[ -f "$file" ]] && mv "$file" "${PATHS[old_logs]}"
+        lm DEBUG "Moved $file to old_logs"
     done
 
     # Get a sorted list of all logs in old_logs
@@ -72,6 +73,7 @@ log_rotate() {
 
         # Remove the oldest logs
         for (( i = 0; i < logs_to_remove; i++ )); do
+            lm DEBUG "Deleted old_log: ${all_logs[i]}"
             rm -f "${all_logs[i]}"
         done
     fi
