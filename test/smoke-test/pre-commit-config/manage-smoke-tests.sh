@@ -45,9 +45,9 @@ log_rotate() {
 
 log_message() {
     local message="$1"
-    echo "$message" >> "$log_file"
+    echo "$message" >> "${PATHS[log_file]}"
 }
-alias lm="log_message"
+
 
 create_smoke_tests() {
     # use the repository's script to create smoke tests
@@ -101,7 +101,7 @@ main() {
 
     TEST_BRANCH="smoke-test-$(date +%s)"
     git checkout -b "$TEST_BRANCH" || { echo "Failed to switch to $TEST_BRANCH"; exit 1; }
-
+    alias lm="log_message"
 
     for REPO in "${SUPPORTED_REPOS[@]}"; do
             # each repo has its own directory and therefore its own log dir and logs
