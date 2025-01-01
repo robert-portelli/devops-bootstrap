@@ -118,7 +118,7 @@ main() {
             create_smoke_tests "$REPO" || { lm "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
             lm "=== Starting Smoke Tests ==="
-            pre-commit run --files "$smoke_tests"/* --verbose || lm "pre-commit ran on smoke tests"
+            pre-commit run --files "${PATHS[smoke_tests]}"/* --verbose || lm "pre-commit ran on smoke tests"
             lm "=== Smoke Tests Complete ==="
             cleanup_smoke_tests
         done
