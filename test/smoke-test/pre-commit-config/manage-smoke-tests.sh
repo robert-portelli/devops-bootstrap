@@ -20,7 +20,7 @@ define_paths() {
         [log_file]="${script_dir}/${REPO}/log/$(date '+%Y-%m-%d_%H-%M-%S')_smoke-test.log"
         [old_logs]="${repo_dir}/log/old"
         [smoke_tests]="${repo_dir}/smoke-tests"
-        [create_script]="${repo_dir}/create-smoke-tests.sh"
+        [create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
     )
 
     mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
@@ -52,17 +52,12 @@ log_message() {
 create_smoke_tests() {
     # use the repository's script to create smoke tests
     local REPO="$1"
-    local BASE_DIR="test/smoke-test/pre-commit-config/$REPO"
-    local script="$BASE_DIR/create-smoke-tests.sh"
-    local smoke_tests="$BASE_DIR/smoke-tests"
-    mkdir -p "$smoke_tests"
-
-    if [[ -x "$script" ]]; then
-        bash "$script" && lm "Created smoke tests for $REPO."
+    local PATH="${PATHS[create_smoke_tests]}"
+    if [[ -x "$PATH" ]]; then
+        bash "$PATH" && lm "Created smoke tests for $REPO."
     else
-        lm "Warning: $script not found or not executable for $REPO."
+        lm "Warning: $PATH not found or not executable for $REPO."
     fi
-    echo "$smoke_tests"
 }
 
 stage_smoke_tests() {
