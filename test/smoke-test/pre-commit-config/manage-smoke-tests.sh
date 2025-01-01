@@ -4,30 +4,44 @@
 # Description: Automates the creation, staging, and testing of smoke tests for pre-commit hooks.
 # Supports multiple repositories dynamically defined in the SUPPORTED_REPOS array.
 
-log_setup() {
-    # Setup logging for a specific repository
+declare -A PATHS
+
+# Centralize path management
+define_paths() {
+    # "repo" refers to the repos listed in .pre-commit-config.yaml
     local REPO="$1"
-    # script_dir points to the directory containing manage-smoke-tests.sh
+    # the path to the directory from which this script is called
     local script_dir
     script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-    local repo_dir="${script_dir}/${REPO}"
 
-    # Create directories for logs
-    local log_dir="${repo_dir}/log"
-    local old_logs="${log_dir}/old"
-    mkdir -p "$log_dir" "$old_logs"
+    PATHS=(
+        [repo_dir]="${script_dir}/${REPO}"
+        [log_dir]="${repo_dir}/log"
+        [log_file]="${script_dir}/${REPO}/log/$(date '+%Y-%m-%d_%H-%M-%S')_smoke-test.log"
+        [old_logs]="${repo_dir}/log/old"
+        [smoke_tests]="${repo_dir}/smoke-tests"
+        [create_script]="${repo_dir}/create-smoke-tests.sh"
+    )
 
-    # Archive old logs
-    for file in "$log_dir"/*.log; do
-        [[ -f "$file" ]] &&  mv "$file" "$old_logs/"
+    mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
+}
+
+log_rotate() {
+    local old_logs_to_keep=5  # Number of old logs to retain
+
+    # Move all logs from log_dir to old_logs
+    for file in "${PATHS[log_dir]}"/*.log; do
+        [[ -f "$file" ]] && mv "$file" "${PATHS[old_logs]}"
     done
 
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
-
-    # return the log_file
-    echo "${log_dir}/${timestamp}_smoke-test.log"
+    # Keep the youngest `old_logs_to_keep` logs and delete the rest
+    local all_logs=("${PATHS[old_logs]}"/*.log)
+    if (( ${#all_logs[@]} > old_logs_to_keep )); then
+        # Sort logs by modification time (newest last) and remove the oldest
+        ls -t "${PATHS[old_logs]}"/*.log | tail -n +$((old_logs_to_keep + 1)) | xargs rm -f
+    fi
 }
+
 
 log_message() {
     local message="$1"
