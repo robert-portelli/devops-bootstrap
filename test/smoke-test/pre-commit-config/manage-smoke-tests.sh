@@ -12,7 +12,7 @@ define_paths() {
     local REPO="$1"
     # the path to the directory from which this script is called
     local script_dir
-    script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    script_dir=$(cd "$(dirname ${BASH_SOURCE[0]})" && pwd)
 
     PATHS=(
         [repo_dir]="${script_dir}/${REPO}"
@@ -34,14 +34,21 @@ log_rotate() {
         [[ -f "$file" ]] && mv "$file" "${PATHS[old_logs]}"
     done
 
-    # Keep the youngest `old_logs_to_keep` logs and delete the rest
+    # Get a sorted list of all logs in old_logs
     local all_logs=("${PATHS[old_logs]}"/*.log)
-    if (( "${#all_logs[@]}" > old_logs_to_keep )); then
-        # Sort logs by modification time (newest last) and remove the oldest
-        ls -t "${PATHS[old_logs]}"/*.log | tail -n +$((old_logs_to_keep + 1)) | xargs rm -f
+    local total_logs=${#all_logs[@]}
+
+    # Check if the number of logs exceeds the threshold
+    if (( total_logs > old_logs_to_keep )); then
+        # Calculate how many logs to remove
+        local logs_to_remove=$((total_logs - old_logs_to_keep))
+
+        # Remove the oldest logs
+        for (( i = 0; i < logs_to_remove; i++ )); do
+            rm -f "${all_logs[i]}"
+        done
     fi
 }
-
 
 log_message() {
     local message="$1"
