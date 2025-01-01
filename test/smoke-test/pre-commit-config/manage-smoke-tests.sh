@@ -6,24 +6,51 @@
 
 declare -A PATHS
 
-# Centralize path management
-define_paths() {
-    # "repo" refers to the repos listed in .pre-commit-config.yaml
-    local REPO="$1"
-    # the path to the directory from which this script is called
-    local script_dir
-    script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-    local repo_dir
-    repo_dir="${script_dir}/${REPO}"
+LOG_LEVEL="INFO" # Default log level
 
-    PATHS[repo_dir]="$repo_dir"
-    PATHS[log_dir]="${repo_dir}/log"
-    PATHS[log_file]="${script_dir}/${REPO}/log/$(date '+%Y-%m-%d_%H-%M-%S')_smoke-test.log"
-    PATHS[old_logs]="${repo_dir}/log/old"
-    PATHS[smoke_tests]="${repo_dir}/smoke-tests"
-    PATHS[create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
+# Define log levels
+declare -A LOG_LEVELS=(
+    [DEBUG]=0
+    [INFO]=1
+    [WARNING]=2
+    [ERROR]=3
+)
 
-    mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
+# Parse arguments to set log level
+parse_arguments() {
+    while [[ "$#" -gt 0 ]]; do
+        case "$1" in
+            --log-level)
+                shift
+                if [[ -n "$1" ]] && [[ "${LOG_LEVELS[$1]}" ]]; then
+                    LOG_LEVEL="$1"
+                else
+                    echo "Invalid log level: $1. Valid options are: DEBUG, INFO, WARNING, ERROR."
+                    exit 1
+                fi
+                ;;
+            --help|-h)
+                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}]"
+                exit 0
+                ;;
+            *)
+                echo "Unknown option: $1"
+                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}]"
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+# Log message with levels
+lm() {
+    local level="$1"
+    local message="$2"
+
+    if (( LOG_LEVELS[$level] >= LOG_LEVELS[$LOG_LEVEL] )); then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$level] $message" >> "${PATHS[log_file]}"
+    fi
 }
 
 log_rotate() {
@@ -50,20 +77,35 @@ log_rotate() {
     fi
 }
 
-lm() {
-    local message="$1"
-    echo "$message" >> "${PATHS[log_file]}"
-}
+# Centralize path management
+define_paths() {
+    # "repo" refers to the repos listed in .pre-commit-config.yaml
+    local REPO="$1"
+    # the path to the directory from which this script is called
+    local script_dir
+    script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    local repo_dir
+    repo_dir="${script_dir}/${REPO}"
 
+    PATHS[repo_dir]="$repo_dir"
+    PATHS[log_dir]="${repo_dir}/log"
+    PATHS[log_file]="${script_dir}/${REPO}/log/$(date '+%Y-%m-%d_%H-%M-%S')_smoke-test.log"
+    PATHS[old_logs]="${repo_dir}/log/old"
+    PATHS[smoke_tests]="${repo_dir}/smoke-tests"
+    PATHS[create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
+
+    mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
+    lm DEBUG "$(declare -p PATHS)"
+}
 
 create_smoke_tests() {
     # use the repository's script to create smoke tests
     local REPO="$1"
     local PATH="${PATHS[create_smoke_tests]}"
     if [[ -x "$PATH" ]]; then
-        bash "$PATH" && lm "Created smoke tests for $REPO."
+        bash "$PATH" && lm DEBUG "Created smoke tests for $REPO."
     else
-        lm "Warning: $PATH not found or not executable for $REPO."
+        lm WARNING "Warning: $PATH not found or not executable for $REPO."
     fi
 }
 
@@ -71,30 +113,30 @@ stage_smoke_tests() {
     # some hooks require files to be staged for analysis
     local REPO="$1"
     local PATH="${PATHS[smoke_tests]}"
-    git add --force "$PATH"/* || lm "Failed to stage smoke tests for $REPO."
+    git add --force "$PATH"/* || lm ERROR "Failed to stage smoke tests for $REPO."
 }
 
 cleanup_smoke_tests() {
     local PATH="${PATHS[smoke_tests]}"
     [[ -d "$PATH" ]] && rm -rf "$PATH"
-    lm "Cleaned up smoke tests directory: $PATH"
+    lm DEBUG "Cleaned up smoke tests directory: $PATH"
 }
 
 teardown() {
     if [[ -z "$CURRENT_BRANCH" ]]; then
-        lm "No cleanup necessary; exiting."
+        lm INFO "No cleanup necessary; exiting."
         exit
     fi
     # Return to the original branch
-    git checkout "$CURRENT_BRANCH" ||  { lm "Failed to switch to $CURRENT_BRANCH"; return 1; }
-
-    # Delete the smoke test branch
-    git branch -D "$TEST_BRANCH" || lm "Failed to delete $TEST_BRANCH"
-    git push origin --delete "$TEST_BRANCH" || lm "No remote branch to delete."
+    git checkout "$CURRENT_BRANCH" ||  { lm ERROR "Failed to switch to $CURRENT_BRANCH"; return 1; }
+    git branch -D "$TEST_BRANCH" || lm ERROR "Failed to delete $TEST_BRANCH"
+    git push origin --delete "$TEST_BRANCH" || lm WARNING "No remote branch to delete."
 }
 
 
 main() {
+    parse_arguments "$@"
+
     SUPPORTED_REPOS=(
         # Add repository names here
         "pre-commit-repo"
@@ -114,13 +156,12 @@ main() {
 
     for REPO in "${SUPPORTED_REPOS[@]}"; do
             define_paths "$REPO" || { echo "path definitions failed for $REPO; skipping."; lm "path definitions failed for $REPO"; continue; }
-            declare -p PATHS
             log_rotate "$REPO"
-            create_smoke_tests "$REPO" || { lm "failed to create smoke tests for $REPO"; continue; }
+            create_smoke_tests "$REPO" || { lm ERROR "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
-            lm "=== Starting Smoke Tests ==="
+            lm INFO "=== Starting Smoke Tests ==="
             pre-commit run --files "${PATHS[smoke_tests]}"/* --verbose || lm "pre-commit ran on smoke tests"
-            lm "=== Smoke Tests Complete ==="
+            lm INFO "=== Smoke Tests Complete ==="
             cleanup_smoke_tests
         done
 }
@@ -128,5 +169,5 @@ main() {
 # Check if the script is run directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 #    alias lm="log_message"
-    main
+    main "$@"
 fi
