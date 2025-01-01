@@ -13,15 +13,15 @@ define_paths() {
     # the path to the directory from which this script is called
     local script_dir
     script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    local repo_dir
+    repo_dir="${script_dir}/${REPO}"
 
-    PATHS=(
-        [repo_dir]="${script_dir}/${REPO}"
-        [log_dir]="${repo_dir}/log"
-        [log_file]="${script_dir}/${REPO}/log/$(date '+%Y-%m-%d_%H-%M-%S')_smoke-test.log"
-        [old_logs]="${repo_dir}/log/old"
-        [smoke_tests]="${repo_dir}/smoke-tests"
-        [create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
-    )
+    PATHS[repo_dir]="$repo_dir"
+    PATHS[log_dir]="${repo_dir}/log"
+    PATHS[log_file]="${script_dir}/${REPO}/log/$(date '+%Y-%m-%d_%H-%M-%S')_smoke-test.log"
+    PATHS[old_logs]="${repo_dir}/log/old"
+    PATHS[smoke_tests]="${repo_dir}/smoke-tests"
+    PATHS[create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
 
     mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
 }
@@ -114,6 +114,7 @@ main() {
 
     for REPO in "${SUPPORTED_REPOS[@]}"; do
             define_paths "$REPO" || { echo "path definitions failed for $REPO; skipping."; lm "path definitions failed for $REPO"; continue; }
+            declare -p PATHS
             log_rotate "$REPO"
             create_smoke_tests "$REPO" || { lm "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
