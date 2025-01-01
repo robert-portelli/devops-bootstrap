@@ -12,7 +12,7 @@ define_paths() {
     local REPO="$1"
     # the path to the directory from which this script is called
     local script_dir
-    script_dir=$(cd "$(dirname ${BASH_SOURCE[0]})" && pwd)
+    script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
     PATHS=(
         [repo_dir]="${script_dir}/${REPO}"
