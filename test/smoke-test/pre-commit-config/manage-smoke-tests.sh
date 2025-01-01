@@ -50,7 +50,7 @@ log_rotate() {
     fi
 }
 
-log_message() {
+lm() {
     local message="$1"
     echo "$message" >> "${PATHS[log_file]}"
 }
@@ -126,6 +126,6 @@ main() {
 
 # Check if the script is run directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    alias lm="log_message"
+#    alias lm="log_message"
     main
 fi
