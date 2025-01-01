@@ -78,7 +78,6 @@ teardown() {
         lm "No cleanup necessary; exiting."
         exit
     fi
-    cleanup_smoke_tests
     # Return to the original branch
     git checkout "$CURRENT_BRANCH" ||  { lm "Failed to switch to $CURRENT_BRANCH"; return 1; }
 
@@ -108,16 +107,14 @@ main() {
     alias lm="log_message"
 
     for REPO in "${SUPPORTED_REPOS[@]}"; do
-            # each repo has its own directory and therefore its own log dir and logs
-            local log_file
-            log_file=$(log_setup "$REPO") || { echo "log setup failed for $REPO; skipping."; lm "log setup failed for $REPO"; continue; }
+            define_paths "$REPO" || { echo "path definitions failed for $REPO; skipping."; lm "path definitions failed for $REPO"; continue; }
+            log_rotate "$REPO"
+            create_smoke_tests "$REPO" || { lm "failed to create smoke tests for $REPO"; continue; }
+            stage_smoke_tests "$REPO"
             lm "=== Starting Smoke Tests ==="
-            local smoke_tests
-            smoke_tests=$(create_smoke_tests "$REPO") || { lm "failed to create smoke tests for $REPO"; continue; }
-            stage_smoke_tests "$smoke_tests" # to smoke test files that require staging
             pre-commit run --files "$smoke_tests"/* --verbose || lm "pre-commit ran on smoke tests"
-            stage_smoke_tests "$smoke_tests" # for modified file cleanup
             lm "=== Smoke Tests Complete ==="
+            cleanup_smoke_tests
         done
 }
 
