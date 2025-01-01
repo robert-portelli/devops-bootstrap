@@ -61,9 +61,16 @@ create_smoke_tests() {
 }
 
 stage_smoke_tests() {
+    # some hooks require files to be staged for analysis
     local REPO="$1"
     local PATH="${PATHS[smoke_tests]}""
     git add --force "$PATH"/* || lm "Failed to stage smoke tests for $REPO."
+}
+
+cleanup_smoke_tests() {
+    local PATH="${PATHS[smoke_tests]}"
+    [[ -d "$PATH" ]] && rm -rf "$PATH"
+    lm "Cleaned up smoke tests directory: $PATH"
 }
 
 teardown() {
@@ -71,6 +78,7 @@ teardown() {
         lm "No cleanup necessary; exiting."
         exit
     fi
+    cleanup_smoke_tests
     # Return to the original branch
     git checkout "$CURRENT_BRANCH" ||  { lm "Failed to switch to $CURRENT_BRANCH"; return 1; }
 
