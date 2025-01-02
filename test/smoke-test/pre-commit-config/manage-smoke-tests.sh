@@ -43,15 +43,17 @@ parse_arguments() {
     done
 }
 
-# Log message with levels
+#log message
 lm() {
-    local level="$1"
-    local message="$2"
+    local level="$1"  # Log level (e.g., DEBUG, INFO, ERROR)
+    local message="$2"  # Message to log
 
     if (( LOG_LEVELS[$level] >= LOG_LEVELS[$LOG_LEVEL] )); then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$level] $message" >> "${PATHS[log_file]}"
     fi
+
 }
+
 
 log_rotate() {
     local old_logs_to_keep=5  # Number of old logs to retain
@@ -97,31 +99,32 @@ define_paths() {
     PATHS[create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
 
     mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
-    lm DEBUG "$(declare -p PATHS)"
+#    lm DEBUG $(log_paths)
 }
+
 
 create_smoke_tests() {
     # use the repository's script to create smoke tests
     local REPO="$1"
-    local PATH="${PATHS[create_smoke_tests]}"
-    if [[ -x "$PATH" ]]; then
-        bash "$PATH" && lm DEBUG "Created smoke tests for $REPO."
+    local create_smokes_script="${PATHS[create_smoke_tests]}"
+    if [[ -x "$create_smokes_script" ]]; then
+        bash "$create_smokes_script" && lm DEBUG "Created smoke tests for $REPO."
     else
-        lm WARNING "Warning: $PATH not found or not executable for $REPO."
+        lm WARNING "Warning: $create_smokes_script not found or not executable for $REPO."
     fi
 }
 
 stage_smoke_tests() {
     # some hooks require files to be staged for analysis
     local REPO="$1"
-    local PATH="${PATHS[smoke_tests]}"
-    git add --force "$PATH"/* || lm ERROR "Failed to stage smoke tests for $REPO."
+    local smokes_dir="${PATHS[smoke_tests]}"
+    git add --force "$smokes_dir"/* || lm ERROR "Failed to stage smoke tests for $REPO."
 }
 
 cleanup_smoke_tests() {
-    local PATH="${PATHS[smoke_tests]}"
-    [[ -d "$PATH" ]] && rm -rf "$PATH"
-    lm DEBUG "Cleaned up smoke tests directory: $PATH"
+    local smokes_dir="${PATHS[smoke_tests]}"
+    [[ -d "$smokes_dir" ]] && rm -rf "$smokes_dir"
+    lm DEBUG "Cleaned up smoke tests directory: $smokes_dir"
 }
 
 teardown() {
@@ -158,6 +161,7 @@ main() {
 
     for REPO in "${SUPPORTED_REPOS[@]}"; do
             define_paths "$REPO" || { echo "path definitions failed for $REPO; skipping."; lm "path definitions failed for $REPO"; continue; }
+            lm DEBUG "$(declare -p PATHS)" || lm DEBUG "Failed to log PATHS array."
             log_rotate "$REPO"
             create_smoke_tests "$REPO" || { lm ERROR "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
