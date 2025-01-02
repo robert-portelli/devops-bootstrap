@@ -17,3 +17,5 @@ repos:
       - id: check-merge-conflict  # avoid lingering merge markers
       - id: mixed-line-ending  # Use Unix line-endings to avoid big no-op CSV diffs.
         args: [--fix=lf]
+
+exclude: ^test/smoke-test/.*$
