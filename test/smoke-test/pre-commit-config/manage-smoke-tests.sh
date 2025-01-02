@@ -132,6 +132,9 @@ teardown() {
         lm INFO "No cleanup necessary; exiting."
         exit
     fi
+    cleanup_smoke_tests
+    git restore --staged .
+    git resotre .
     # Return to the original branch
     git checkout "$CURRENT_BRANCH" ||  { lm ERROR "Failed to switch to $CURRENT_BRANCH"; return 1; }
     git branch -D "$TEST_BRANCH" || lm ERROR "Failed to delete $TEST_BRANCH"
@@ -161,14 +164,14 @@ main() {
 
     for REPO in "${SUPPORTED_REPOS[@]}"; do
             define_paths "$REPO" || { echo "path definitions failed for $REPO; skipping."; lm "path definitions failed for $REPO"; continue; }
-            lm DEBUG "$(declare -p PATHS)" || lm DEBUG "Failed to log PATHS array."
+            #lm DEBUG "$(declare -p PATHS)" || lm DEBUG "Failed to log PATHS array."
             log_rotate "$REPO"
             create_smoke_tests "$REPO" || { lm ERROR "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
             lm INFO "=== Starting Smoke Tests ==="
             pre-commit run --files "${PATHS[smoke_tests]}"/* --verbose || lm "pre-commit ran on smoke tests"
             lm INFO "=== Smoke Tests Complete ==="
-            cleanup_smoke_tests
+            #cleanup_smoke_tests
         done
 }
 
