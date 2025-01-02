@@ -11,11 +11,10 @@ cd "$BASE_DIR" || exit 1
 
 echo "Creating smoke test files..."
 
-test_content=(
-    "This line has trailing spaces.
-        Another bad line.   "
-    "This file does not end with a newline."
-)
+# Create a file with no newline at the end
+cat <<EOL > eof-missing-newline.txt
+This file does not end with a newline.
+EOL
 
 # Create a large file to test check-added-large-files
 head -c 6M </dev/urandom > large-file.bin
