@@ -134,7 +134,7 @@ teardown() {
     fi
     cleanup_smoke_tests
     git restore --staged .
-    git resotre .
+    git restore .
     # Return to the original branch
     git checkout "$CURRENT_BRANCH" ||  { lm ERROR "Failed to switch to $CURRENT_BRANCH"; return 1; }
     git branch -D "$TEST_BRANCH" || lm ERROR "Failed to delete $TEST_BRANCH"
