@@ -189,7 +189,7 @@ main() {
             create_smoke_tests "$REPO" || { lm ERROR "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
             lm INFO "=== Starting Smoke Tests ==="
-            run_pre-commit "$REPO"
+            run_pre_commit "$REPO"
             lm INFO "=== Smoke Tests Complete ==="
             #cleanup_smoke_tests
         done
