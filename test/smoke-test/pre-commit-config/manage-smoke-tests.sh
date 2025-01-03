@@ -132,6 +132,8 @@ run_pre_commit() {
     local REPO="$1"
     local config_path="${PATHS[pc_config]}"
     local smoke_tests="${PATHS[smoke_tests]}"
+    local log_file="${PATHS[log_file]}"
+
 
     if [[ ! -f "$config_path" ]]; then
         lm ERROR "Pre-commit config not found: $config_path"
@@ -142,7 +144,7 @@ run_pre_commit() {
     for file in "$smoke_tests"/*; do
         if [[ -f "$file" ]]; then
             lm INFO "Running pre-commit for $file using config: $config_path"
-            pre-commit run --config "$config_path" --files "$file" --verbose || lm WARNING "Pre-commit failed for $file"
+            pre-commit run --config "$config_path" --files "$file" --verbose >> "$log_file" 2>&1 || lm WARNING "Pre-commit failed for $file"
         fi
     done
 }
