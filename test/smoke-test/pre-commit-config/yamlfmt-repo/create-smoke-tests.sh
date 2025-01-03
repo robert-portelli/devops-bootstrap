@@ -7,7 +7,7 @@ SMOKE_TEST_DIR="test/smoke-test/pre-commit-config/yamlfmt-repo/smoke-tests"
 
 # ensure the directory exists
 mkdir -p "$SMOKE_TEST_DIR"
-cd SMOKE_TEST_DIR || exit 1
+cd "$SMOKE_TEST_DIR" || exit 1
 
 # Test Case 1: Unformatted YAML
 cat <<EOL >unformatted.yaml
