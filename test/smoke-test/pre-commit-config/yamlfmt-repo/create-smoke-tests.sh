@@ -10,14 +10,14 @@ mkdir -p "$SMOKE_TEST_DIR"
 cd "$SMOKE_TEST_DIR" || exit 1
 
 # Test Case 1: Unformatted YAML
-cat <<EOL >unformatted.yaml
+cat <<EOL > unformatted.yaml
 key1: value1
 key2:value2
  key3:   value3
 EOL
 
 # Test Case 2: Excessive whitespace
-cat <<extra_whitespace.yaml
+cat <<EOL > extra_whitespace.yaml
 key1:  value1
    
 key2:
