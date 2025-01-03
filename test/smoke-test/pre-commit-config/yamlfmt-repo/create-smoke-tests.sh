@@ -3,7 +3,7 @@
 # Description: Creates test cases to validate yamlfmt hook functionality.
 
 # Define the directory to store test cases
-SMOKE_TEST_DIR="test/smoke-test/pre-commit-config/yaml-fmt-repo/smoke-tests"
+SMOKE_TEST_DIR="test/smoke-test/pre-commit-config/yamlfmt-repo/smoke-tests"
 
 # ensure the directory exists
 mkdir -p "$SMOKE_TEST_DIR"
