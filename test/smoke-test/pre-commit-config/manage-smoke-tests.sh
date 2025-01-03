@@ -97,6 +97,7 @@ define_paths() {
     PATHS[old_logs]="${repo_dir}/log/old"
     PATHS[smoke_tests]="${repo_dir}/smoke-tests"
     PATHS[create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
+    PATHS[pc_config]="${repo_dir}/.ST-pre-commit-config.yaml"  # Entry for .ST-pre-commit-config.yaml
 
     mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
 #    lm DEBUG $(log_paths)
