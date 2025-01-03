@@ -128,6 +128,24 @@ cleanup_smoke_tests() {
     lm DEBUG "Cleaned up smoke tests directory: $smokes_dir"
 }
 
+run_pre_commit() {
+    local REPO="$1"
+    local config_path="${PATHS[pc_config]}"
+    local smoke_tests="${PATHS[smoke_tests]}/*"
+
+    if [[ ! -f "$config_path" ]]; then
+        lm ERROR "Pre-commit config not found: $config_path"
+        return 1
+    fi
+
+    lm INFO "Running pre-commit using config: $config_path"
+    pre-commit run \
+        --config "$config_path" \
+        --files "$smoke_tests" \
+        --verbose \
+        || lm ERROR "Pre-commit run failed for $REPO"
+}
+
 teardown() {
     if [[ -z "$CURRENT_BRANCH" ]]; then
         lm INFO "No cleanup necessary; exiting."
@@ -171,7 +189,7 @@ main() {
             create_smoke_tests "$REPO" || { lm ERROR "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
             lm INFO "=== Starting Smoke Tests ==="
-            pre-commit run --files "${PATHS[smoke_tests]}"/* --verbose || lm "pre-commit ran on smoke tests"
+            run_pre-commit "$REPO"
             lm INFO "=== Smoke Tests Complete ==="
             #cleanup_smoke_tests
         done
