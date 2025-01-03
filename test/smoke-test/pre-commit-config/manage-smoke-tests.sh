@@ -131,7 +131,7 @@ cleanup_smoke_tests() {
 run_pre_commit() {
     local REPO="$1"
     local config_path="${PATHS[pc_config]}"
-    local smoke_tests="${PATHS[smoke_tests]}/*"
+    local smoke_tests="${PATHS[smoke_tests]}"
 
     if [[ ! -f "$config_path" ]]; then
         lm ERROR "Pre-commit config not found: $config_path"
@@ -141,7 +141,7 @@ run_pre_commit() {
     lm INFO "Running pre-commit using config: $config_path"
     pre-commit run \
         --config "$config_path" \
-        --files "$smoke_tests" \
+        --files "$smoke_tests"/* \
         --verbose \
         || lm ERROR "Pre-commit run failed for $REPO"
 }
