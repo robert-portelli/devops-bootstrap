@@ -139,12 +139,12 @@ run_pre_commit() {
     fi
 
     lm INFO "Running pre-commit using config: $config_path"
-    pre-commit run \
-        --config "$config_path" \
-        --files "$smoke_tests"/* \
-        --verbose \
-        || lm ERROR "Pre-commit run failed for $REPO"
-}
+    for file in "$smoke_tests_dir"/*; do
+        if [[ -f "$file" ]]; then
+            lm INFO "Running pre-commit for $file using config: $config_path"
+            pre-commit run --config "$config_path" --files "$file" --verbose || lm WARNING "Pre-commit failed for $file"
+        fi
+    done}
 
 teardown() {
     if [[ -z "$CURRENT_BRANCH" ]]; then
