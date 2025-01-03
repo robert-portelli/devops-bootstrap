@@ -97,6 +97,7 @@ define_paths() {
     PATHS[old_logs]="${repo_dir}/log/old"
     PATHS[smoke_tests]="${repo_dir}/smoke-tests"
     PATHS[create_smoke_tests]="${repo_dir}/create-smoke-tests.sh"
+    PATHS[pc_config]="${repo_dir}/.ST-pre-commit-config.yaml"  # Entry for .ST-pre-commit-config.yaml
 
     mkdir -p "${PATHS[log_dir]}" "${PATHS[old_logs]}" "${PATHS[smoke_tests]}"
 #    lm DEBUG $(log_paths)
@@ -127,6 +128,27 @@ cleanup_smoke_tests() {
     lm DEBUG "Cleaned up smoke tests directory: $smokes_dir"
 }
 
+run_pre_commit() {
+    local REPO="$1"
+    local config_path="${PATHS[pc_config]}"
+    local smoke_tests="${PATHS[smoke_tests]}"
+    local log_file="${PATHS[log_file]}"
+
+
+    if [[ ! -f "$config_path" ]]; then
+        lm ERROR "Pre-commit config not found: $config_path"
+        return 1
+    fi
+
+    lm INFO "Running pre-commit using config: $config_path"
+    for file in "$smoke_tests"/*; do
+        if [[ -f "$file" ]]; then
+            lm INFO "Running pre-commit for $file using config: $config_path"
+            pre-commit run --config "$config_path" --files "$file" --verbose >> "$log_file" 2>&1 || lm WARNING "Pre-commit failed for $file"
+        fi
+    done
+}
+
 teardown() {
     if [[ -z "$CURRENT_BRANCH" ]]; then
         lm INFO "No cleanup necessary; exiting."
@@ -134,7 +156,7 @@ teardown() {
     fi
     cleanup_smoke_tests
     git restore --staged .
-    git resotre .
+    git restore .
     # Return to the original branch
     git checkout "$CURRENT_BRANCH" ||  { lm ERROR "Failed to switch to $CURRENT_BRANCH"; return 1; }
     git branch -D "$TEST_BRANCH" || lm ERROR "Failed to delete $TEST_BRANCH"
@@ -148,6 +170,7 @@ main() {
     SUPPORTED_REPOS=(
         # Add repository names here
         "pre-commit-repo"
+        "yamlfmt-repo"
     )
 
     if [[ "${#SUPPORTED_REPOS[@]}" -eq 0 ]]; then
@@ -169,7 +192,7 @@ main() {
             create_smoke_tests "$REPO" || { lm ERROR "failed to create smoke tests for $REPO"; continue; }
             stage_smoke_tests "$REPO"
             lm INFO "=== Starting Smoke Tests ==="
-            pre-commit run --files "${PATHS[smoke_tests]}"/* --verbose || lm "pre-commit ran on smoke tests"
+            run_pre_commit "$REPO"
             lm INFO "=== Smoke Tests Complete ==="
             #cleanup_smoke_tests
         done
