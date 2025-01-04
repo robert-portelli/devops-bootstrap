@@ -34,4 +34,14 @@ repos:
           - -formatter=trim_trailing_whitespace=true
           - -formatter=eof_newline=true
           - -formatter=gitignore_path=".gitignore"
+  - repo: local
+    hooks:
+      - id: smoked-pc-config-check
+        name: Pre-Commit Config Smoke Test
+        description: Validate .pre-commit-config.yaml against .ST-pre-commit-config.yaml
+          files.
+        entry: bin/smoked-pc-config/main.sh
+        language: system
+        pass_filenames: false  # Prevent passing file paths since the script handles them internally.
+        always_run: true  # Ensures the hook runs even if no files have changed.
 exclude: ^test/smoke-test/.*$
