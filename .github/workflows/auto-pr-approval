@@ -1,0 +1,38 @@
+# Filename: .github/workflows/auto-pr-approval
+name: Auto-Approve Pull Requests
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  auto-approve:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Fetch Admin Collaborators
+      - name: Fetch Admin Collaborators
+        id: fetch-admins
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch collaborators and filter for admins
+          admin_count=$(gh api /repos/${{ github.repository }}/collaborators \
+            --jq '.[] | select(.permissions.admin == true)' | wc -l)
+
+          # Log the admin count and export it as an environment variable
+          echo "Number of admins: $admin_count"
+          echo "admin_count=$admin_count" >> $GITHUB_ENV
+
+      # Step 2: Conditionally Approve PR
+      - name: Conditionally Approve PR
+        if: env.admin_count == '1' # Proceed if there is only one admin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Single admin detected. Auto-approving pull request."
+          gh pr review ${{ github.event.pull_request.number }} --approve
+
+      # Step 3: Skip Approval if Multiple Admins
+      - name: Skip Auto-Approval
+        if: env.admin_count != '1' # Skip if more than one admin exists
+        run: echo "Multiple admins detected. Approval requires manual review."
