@@ -2,33 +2,41 @@
 # Filename: .github/workflows/auto-pr-approval
 name: Auto-Approve Pull Requests
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened]
+    branches:
+      - main
+permissions: {}
 jobs:
   auto-approve:
     runs-on: ubuntu-latest
+    permissions:  # elevated permissions at the job level
+      contents: read  # Needed for fetching repo data (e.g., collaborators)
+      pull-requests: write  # Needed to approve pull requests
     steps:
       # Step 1: Fetch Admin Collaborators
       - name: Fetch Admin Collaborators
         id: fetch-admins
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Fetch collaborators and filter for admins
-          admin_count=$(gh api /repos/${{ github.repository }}/collaborators \
-            --jq '.[] | select(.permissions.admin == true)' | wc -l)
-
-          # Log the admin count and export it as an environment variable
+          # Use mock value if present, otherwise fetch from GitHub API
+          if [[ -n "${MOCK_ADMIN_COUNT}" ]]; then
+            echo "Mocking admin count: $MOCK_ADMIN_COUNT"
+            admin_count=$MOCK_ADMIN_COUNT
+          else
+            admin_count=$(gh api /repos/${{ github.repository }}/collaborators \
+              --jq '.[] | select(.permissions.admin == true)' | wc -l)
+          fi
           echo "Number of admins: $admin_count"
           echo "admin_count=$admin_count" >> $GITHUB_ENV
       # Step 2: Conditionally Approve PR
-      - name: Conditionally Approve PR
-        if: env.admin_count == '1'  # Proceed if there is only one admin
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Single admin detected. Auto-approving pull request."
-          gh pr review ${{ github.event.pull_request.number }} --approve
+      - name: Auto-Approve PR
+        if: env.admin_count == '1'
+        uses: peter-evans/approve-pull-request-action@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       # Step 3: Skip Approval if Multiple Admins
       - name: Skip Auto-Approval
         if: env.admin_count != '1'  # Skip if more than one admin exists
