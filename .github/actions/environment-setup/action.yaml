@@ -1,0 +1,39 @@
+---
+# Filename: .github/actions/environment-setup/action.yaml
+name: "Environment Setup"
+description: "Sets up the environment for build or test jobs"
+runs:
+  using: "composite"
+  steps:
+    # Step 1: Set up container environment
+    - name: Initialize and Update System
+      run: |
+        pacman-key --init                                  # Initialize pacman keyring for signature verification
+        pacman-key --populate archlinux                    # Populate the Arch Linux keyring
+        pacman -Syu --noconfirm                            # Update all packages to the latest versions
+    # Step 2: Install BATS and Related Tools
+    - name: Install BATS and Related Tools
+      run: pacman -S --noconfirm bats bats-assert bats-file bats-support
+    # Step 3: Restore pacman cache
+    - name: Restore Pacman Cache
+      uses: actions/cache@v3
+      with:
+        path: /var/cache/pacman/pkg
+        key: pacman-cache-${{ runner.os }}-${{ hashFiles('build.yml') }}
+        restore-keys: |
+          pacman-cache-${{ runner.os }}-
+    # Step 4: Restore Pre-Commit Cache
+    - name: Restore Pre-Commit Cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-cache-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml')
+          }}
+        restore-keys: |
+          pre-commit-cache-${{ runner.os }}-
+    # Step 5: Install Pre-Commit
+    - name: Install Pre-Commit
+      run: pacman -S --noconfirm pre-commit
+    # Step 6: Run Pre-Commit to Populate Cache
+    - name: Run Pre-Commit
+      run: pre-commit install && pre-commit run --all-files
