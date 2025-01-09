@@ -34,8 +34,9 @@ jobs:
       # Step 2: Conditionally Approve PR
       - name: Auto-Approve PR
         if: env.admin_count == '1'
-        uses: peter-evans/approve-pull-request-action@v7
+        uses: hmarr/auto-approve-action@v4
         with:
+          review-message: "Auto approved automated PR"
           github-token: ${{ secrets.GITHUB_TOKEN }}
       # Step 3: Skip Approval if Multiple Admins
       - name: Skip Auto-Approval
