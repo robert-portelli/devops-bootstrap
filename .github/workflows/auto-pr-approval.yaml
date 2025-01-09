@@ -23,14 +23,14 @@ jobs:
         run: |
           # Use mock value if present, otherwise fetch from GitHub API
           if [[ -n "${MOCK_ADMIN_COUNT}" ]]; then
-            echo "Mocking admin count: $MOCK_ADMIN_COUNT"
+            echo "Mocking admin count: \"$MOCK_ADMIN_COUNT\""
             admin_count="$MOCK_ADMIN_COUNT"
           else
             admin_count=$(gh api /repos/${{ github.repository }}/collaborators \
               --jq '.[] | select(.permissions.admin == true)' | wc -l)
           fi
-          echo "Number of admins: $admin_count"
-          echo "admin_count=$admin_count" >> $GITHUB_ENV
+          echo "Number of admins: \"$admin_count\""
+          echo "admin_count=\"$admin_count\"" >> $GITHUB_ENV
       # Step 2: Conditionally Approve PR
       - name: Auto-Approve PR
         if: env.admin_count == '1'
