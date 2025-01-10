@@ -72,7 +72,7 @@ repos:
         description: Runs actionlint to lint GitHub Actions workflow files
         language: golang
         types: [yaml]
-        files: ^\.github/(workflows|actions)/
+        files: ^\.github/(workflows)/
         entry: actionlint
         minimum_pre_commit_version: 3.0.0
         # ============= Shell ============================
