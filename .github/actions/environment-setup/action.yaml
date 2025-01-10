@@ -11,6 +11,9 @@ runs:
         pacman-key --init                                  # Initialize pacman keyring for signature verification
         pacman-key --populate archlinux                    # Populate the Arch Linux keyring
         pacman -Syu --noconfirm                            # Update all packages to the latest versions
+    # Step 1.5: Install Node.js (for actions/cache@v3)
+    - name: Install Node.js
+      run: pacman -S --noconfirm nodejs npm
     # Step 2: Install BATS and Related Tools
     - name: Install BATS and Related Tools
       run: pacman -S --noconfirm bats bats-assert bats-file bats-support
