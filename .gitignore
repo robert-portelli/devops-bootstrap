@@ -1,6 +1,9 @@
 # Exclude all files under the pre-commit-config smoke test directory
 test/smoke-test/pre-commit-config/**
 
+# Ignore smoke test cache
+test/smoke-test/.cache/
+
 # Include the manage-smoke-tests.sh script
 !test/smoke-test/pre-commit-config/manage-smoke-tests.sh
 

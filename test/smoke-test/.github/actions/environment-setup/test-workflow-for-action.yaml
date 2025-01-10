@@ -1,0 +1,16 @@
+# Filename: test/smoke-test/.github/actions/environment-setup-test-workflow-for-action.yaml
+name: Test environment setup composite action
+
+on:
+  workflow_call:
+
+jobs:
+  test-environment-setup-action:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+
+    steps:
+      # Step 1: Set up Environment using the Composite Action
+      - name: Set up Environment
+        uses: ./.github/actions/environment-setup
