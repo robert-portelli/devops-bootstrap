@@ -1,4 +1,5 @@
 ---
+exclude: ^test/smoke-test/.*$
 repos:
   # ==================== General =========================
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -15,7 +16,7 @@ repos:
       - id: name-tests-test  # follow pytest naming convention
       - id: requirements-txt-fixer
       - id: check-merge-conflict  # avoid lingering merge markers
-      - id: mixed-line-ending  # Use Unix line-endings to avoid big no-op CSV diffs.
+      - id: mixed-line-ending
         args: [--fix=lf]
   - repo: https://github.com/google/yamlfmt
     rev: v0.14.0
@@ -42,6 +43,111 @@ repos:
           files.
         entry: bin/smoked-pc-config/main.sh
         language: system
-        pass_filenames: false  # Prevent passing file paths since the script handles them internally.
+        pass_filenames: false  # Prevent passing file paths since the script handles
+        # them internally.
         always_run: true  # Ensures the hook runs even if no files have changed.
-exclude: ^test/smoke-test/.*$
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.21.0
+    hooks:
+      - id: yamllint
+        name: YAML Linter (yamllint)
+        description: Lints YAML files to catch errors and ensure consistency according
+          to YAML style conventions.
+        language: python
+        types: [yaml]
+        args:
+          # make the line lengths pass
+          - -d
+          - "{extends: default, rules: {line-length: {max: 90}}}"
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+  # ============== GitHub Actions Workflows ======================
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.4
+    hooks:
+      - id: actionlint
+        name: Lint GitHub Actions workflow files
+        description: Runs actionlint to lint GitHub Actions workflow files
+        language: golang
+        types: [yaml]
+        files: ^\.github/(workflows|actions)/
+        entry: actionlint
+        minimum_pre_commit_version: 3.0.0
+        # ============= Shell ============================
+  - repo: https://github.com/openstack/bashate
+    rev: 2.1.1
+    hooks:
+      - id: bashate
+        name: bashate
+        description: This hook runs bashate for linting shell scripts
+        entry: bashate
+        language: python
+        types: [shell]
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        description: Test shell scripts with shellcheck
+        entry: shellcheck
+        language: python
+        types: [shell]
+        require_serial: true  # shellcheck can detect sourcing this way
+        args: [-f, gcc]  # output filename:linenum:colnum (clickable)
+        # ============ Python ============================
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.1
+    hooks:
+      - id: ruff
+        types: [python]
+        args: [--fix, --show-fixes]
+      - id: ruff-format
+        types: [python]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.0
+    hooks:
+      - id: pyupgrade
+        name: PyUpgrade Python Syntax Updater
+        description: This hook automatically upgrades Python syntax to the latest
+          version, improving readability and ensuring compatibility with modern Python
+          features.
+        entry: pyupgrade
+        language: python
+        types: [python]
+        args: [--py39-plus]
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v3.1.0
+    hooks:
+      - id: add-trailing-comma
+        name: Add Trailing Comma Formatter
+        description: This hook adds trailing commas where appropriate in Python code,
+          improving diffs and adhering to PEP 8 recommendations.
+        entry: add-trailing-comma
+        language: python
+        types: [python]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        name: mypy
+        description: Static type analysis
+        entry: mypy
+        language: python
+        types_or: [python, pyi]
+        args: [--ignore-missing-imports, --scripts-are-modules]
+        require_serial: true
+        minimum_pre_commit_version: 2.9.2
+        # ===================== JavaScript =============================
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.16.0
+    hooks:
+      - id: eslint
+        name: ESLint JavaScript Linter
+        description: This hook runs ESLint for linting JavaScript and TypeScript files,
+          ensuring code quality and adherence to style guides.
+        entry: eslint
+        language: node
+        files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
+        types: [file]
