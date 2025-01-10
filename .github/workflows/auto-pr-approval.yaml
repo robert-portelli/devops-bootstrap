@@ -1,7 +1,7 @@
 ---
 # Filename: .github/workflows/auto-pr-approval
 name: Auto-Approve Pull Requests
-on:
+on:  # yamllint disable-line rule:truthy
   pull_request_target:
     types: [opened, reopened]
     branches:
@@ -18,7 +18,6 @@ jobs:
       - name: Fetch Admin Collaborators
         id: fetch-admins
         env:
-          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Use mock value if present, otherwise fetch from GitHub API
