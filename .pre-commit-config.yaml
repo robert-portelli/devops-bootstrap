@@ -19,7 +19,7 @@ repos:
       - id: mixed-line-ending
         args: [--fix=lf]
   - repo: https://github.com/google/yamlfmt
-    rev: v0.14.0
+    rev: v0.15.0
     hooks:
       - id: yamlfmt
         name: YAML Formatter (yamlfmt)
@@ -47,7 +47,7 @@ repos:
         # them internally.
         always_run: true  # Ensures the hook runs even if no files have changed.
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.21.0
+    rev: v1.35.1
     hooks:
       - id: yamllint
         name: YAML Linter (yamllint)
@@ -65,7 +65,7 @@ repos:
       - id: codespell
   # ============== GitHub Actions Workflows ======================
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.4
+    rev: v1.7.6
     hooks:
       - id: actionlint
         name: Lint GitHub Actions workflow files
@@ -76,15 +76,6 @@ repos:
         entry: actionlint
         minimum_pre_commit_version: 3.0.0
         # ============= Shell ============================
-  - repo: https://github.com/openstack/bashate
-    rev: 2.1.1
-    hooks:
-      - id: bashate
-        name: bashate
-        description: This hook runs bashate for linting shell scripts
-        entry: bashate
-        language: python
-        types: [shell]
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1
     hooks:
@@ -98,7 +89,7 @@ repos:
         args: [-f, gcc]  # output filename:linenum:colnum (clickable)
         # ============ Python ============================
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.1
+    rev: v0.9.1
     hooks:
       - id: ruff
         types: [python]
@@ -106,7 +97,7 @@ repos:
       - id: ruff-format
         types: [python]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.19.0
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         name: PyUpgrade Python Syntax Updater
@@ -128,7 +119,7 @@ repos:
         language: python
         types: [python]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
+    rev: v1.14.1
     hooks:
       - id: mypy
         name: mypy
@@ -141,7 +132,7 @@ repos:
         minimum_pre_commit_version: 2.9.2
         # ===================== JavaScript =============================
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.16.0
+    rev: v9.17.0
     hooks:
       - id: eslint
         name: ESLint JavaScript Linter
