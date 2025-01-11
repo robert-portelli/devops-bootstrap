@@ -1,0 +1,59 @@
+---
+# Filename: .github/workflows/branch-protection.yml
+name: Set Branch Protection
+on:  # yamllint disable-line rule:truthy
+  create:
+  workflow_dispatch:
+jobs:
+  protect-default-branch:
+    # yamllint disable-line rule:line-length
+    if: ${{ github.event_name != 'workflow_dispatch' && github.ref == format('refs/heads/{0}',
+      github.event.repository.default_branch) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Default Branch Protection Rules
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REQUIRED_APPROVALS: 1
+          ALLOW_FORCE_PUSHES: "false"
+          ALLOW_DELETIONS: "false"
+          REQUIRED_LINEAR_HISTORY: "true"
+        run: |
+          default_branch="${{ github.event.repository.default_branch }}"
+          gh api --method PUT \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/branches/${default_branch}/protection" \
+            -F required_status_checks="\
+              {\"strict\":true,\"contexts\":[\"Super Linter\"]}" \
+            -F enforce_admins=false \
+            -F required_pull_request_reviews="{\
+              \"required_approving_review_count\":\"${REQUIRED_APPROVALS}\", \
+              \"dismiss_stale_reviews\":true}" \
+            -F restrictions="null" \
+            -F allow_force_pushes="${ALLOW_FORCE_PUSHES}" \
+            -F allow_deletions="${ALLOW_DELETIONS}" \
+            -F required_linear_history="${REQUIRED_LINEAR_HISTORY}"
+  protect-other-branches:
+    # yamllint disable-line rule:line-length
+    if: ${{ github.event_name != 'workflow_dispatch' && github.ref != format('refs/heads/{0}',
+      github.event.repository.default_branch) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Non-Default Branch Protection Rules
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ALLOW_FORCE_PUSHES: "true"
+          ALLOW_DELETIONS: "true"
+          REQUIRED_LINEAR_HISTORY: "false"
+        run: |-
+          branch_name="${GITHUB_REF#refs/heads/}"
+          gh api --method PUT \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/branches/${branch_name}/protection" \
+            -F required_status_checks="{\"strict\":false,\"contexts\":[]}" \
+            -F enforce_admins=false \
+            -F required_pull_request_reviews="null" \
+            -F restrictions="null" \
+            -F allow_force_pushes="${ALLOW_FORCE_PUSHES}" \
+            -F allow_deletions="${ALLOW_DELETIONS}" \
+            -F required_linear_history="${REQUIRED_LINEAR_HISTORY}"
