@@ -1,7 +1,7 @@
 ---
 # Filename: .github/workflows/main.yaml
 name: Main Workflow Orchestrator
-on:
+on:  # yamllint disable-line rule:truthy
   push:
     branches:
       - '**'
@@ -10,11 +10,6 @@ on:
 jobs:
   setup-environment:
     uses: ./.github/workflows/environment-setup.yaml
-    #branch-protection:
-    #name: Trigger Branch Protection Workflow
-    #uses: ./.github/workflows/branch-protection.yaml
-    #with:
-    #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #test:
-    #name: Test Test Environment
-    #uses: ./.github/workflows/test_test_environment.yaml
+  test-environment:
+    needs: setup-environment
+    uses: ./.github/workflows/test-test-environment.yaml
