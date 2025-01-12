@@ -1,0 +1,18 @@
+---
+# Filename: .github/workflows/main.yaml
+name: Main Workflow Orchestrator
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+  workflow_dispatch:
+jobs:
+  branch-protection:
+    name: Trigger Branch Protection Workflow
+    uses: ./.github/workflows/branch-protection.yaml
+    #with:
+    #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  test:
+    name: Test Test Environment
+    uses: ./.github/workflows/test_test_environment.yaml
