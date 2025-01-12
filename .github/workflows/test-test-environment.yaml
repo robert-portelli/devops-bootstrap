@@ -4,17 +4,12 @@ name: Smoke Test Environment
 on:
   workflow_call:
 jobs:
-  test-build-job:
+  test-environment-setup:
     runs-on: ubuntu-latest
-    container:
-      image: archlinux:base-devel
     steps:
       # Check out Code
       - name: Check out code
         uses: actions/checkout@v4
-      # Set up Environment using the Composite Action
-      - name: Set up Environment
-        uses: ./.github/actions/environment-setup
       # Run Tests
       - name: Run BATS Tests
         run: |-
