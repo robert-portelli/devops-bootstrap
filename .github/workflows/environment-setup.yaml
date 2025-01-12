@@ -1,0 +1,34 @@
+---
+# Filename: .github/workflow/environment-setup.yaml
+name: "Environment Setup"
+on:
+  workflow_call:
+jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      # Step 1: Set up container environment
+      - name: Initialize and Update System
+        run: |
+          # Initialize pacman keyring for signature verification
+          pacman-key --init
+          # Populate the Arch Linux keyring
+          pacman-key --populate archlinux
+           # Update all packages to the latest versions
+          pacman -Syu --noconfirm
+      # Step 1.5: Install Node.js (for actions/cache@v3)
+      - name: Install Node.js
+        run: pacman -S --noconfirm nodejs npm
+      # Step 2: Install BATS and Related Tools
+      - name: Install BATS and Related Tools
+        run: pacman -S --noconfirm bats bats-assert bats-file bats-support
+      # Step 3: Restore pacman cache
+      - name: Restore Pacman Cache
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/pacman/pkg
+          key: pacman-cache-${{ runner.os }}-${{ hashFiles('build.yml') }}
+          restore-keys: |-
+            pacman-cache-${{ runner.os }}-

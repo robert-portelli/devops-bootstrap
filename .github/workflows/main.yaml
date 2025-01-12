@@ -8,11 +8,13 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  #branch-protection:
-  #name: Trigger Branch Protection Workflow
-  #uses: ./.github/workflows/branch-protection.yaml
-  #with:
-  #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  test:
-    name: Test Test Environment
-    uses: ./.github/workflows/test_test_environment.yaml
+  setup-environment:
+    uses: ./.github/workflows/environment-setup.yaml
+    #branch-protection:
+    #name: Trigger Branch Protection Workflow
+    #uses: ./.github/workflows/branch-protection.yaml
+    #with:
+    #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #test:
+    #name: Test Test Environment
+    #uses: ./.github/workflows/test_test_environment.yaml
