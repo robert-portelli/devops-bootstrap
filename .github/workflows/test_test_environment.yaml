@@ -9,13 +9,13 @@ jobs:
     container:
       image: archlinux:base-devel
     steps:
-      # Step 1: Set up Environment using the Composite Action
-      - name: Set up Environment
-        uses: ./.github/actions/environment-setup
-      # Step 2: Check out Code
+      # Check out Code
       - name: Check out code
         uses: actions/checkout@v4
-      # Step 3: Run Tests
+      # Set up Environment using the Composite Action
+      - name: Set up Environment
+        uses: ./.github/actions/environment-setup
+      # Run Tests
       - name: Run BATS Tests
         run: |-
           bats test/_common_setup_test.bats
