@@ -4,6 +4,9 @@ name: "Environment Setup"
 description: "Sets up the environment for build or test jobs"
 runs:
   using: "composite"
+  defaults:
+    run:
+      shell: bash
   steps:
     # Step 1: Set up container environment
     - name: Initialize and Update System
