@@ -9,7 +9,7 @@ on:  # yamllint disable-line rule:truthy
         description: "The pull request number to be checked"
         required: true
         type: number
-  pull_request:
+  pull_request:  # temporary for debugging
 jobs:
   check-pr-readiness:
     runs-on: ubuntu-latest
@@ -35,30 +35,37 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
-      - name: Fetch pull request details
+      - name: Create payload for PR details
         id: pr-details
         env:
           GH_TOKEN: ${{ github.token }}
         run: |-
-          PR_NUMBER=${{ github.event.inputs.pr_number }}
-          PR_STATUS=$(gh pr view "$PR_NUMBER" \
-            --json state,mergeable \
-            --jq '{state: .state, mergeable: .mergeable}')
-          echo "PR_STATUS=$PR_STATUS" >> "$GITHUB_ENV"
+          # PR_NUMBER="${{ inputs.pr_number }}"
+          PR_NUMBER=22  # temporary for debugging
+          echo "Fetching details for PR number: $PR_NUMBER"
+
+          # Create the JSON payload file
+          gh pr view "$PR_NUMBER" --json state,mergeable > pr_payload.json
+
+          # Extract the status and save to environment variables
+          PR_STATE=$(jq -r '.state' pr_payload.json)
+          PR_MERGEABLE=$(jq -r '.mergeable' pr_payload.json)
+          echo "PR_STATE=$PR_STATE" >> "$GITHUB_ENV"
+          echo "PR_MERGEABLE=$PR_MERGEABLE" >> "$GITHUB_ENV"
       - name: Validate PR state
         env:
           GH_TOKEN: ${{ github.token }}
         run: |-
-          if [[ "$(echo "$PR_STATUS" | jq -r '.state')" != "OPEN" ]]; then
+          if [[ "$PR_STATE" != "OPEN" ]]; then
             echo "Error: PR is not open for review."
             exit 1
           fi
 
-          if [[ "$(echo "$PR_STATUS" | jq -r '.mergeable')" != "MERGEABLE" ]]; then
-            echo "Error: PR is not in a mergeable state \
-            (possible conflicts or missing checks)."
+          if [[ "$PR_MERGEABLE" != "MERGEABLE" ]]; then
+            ERROR_MSG="Error: PR is not in a mergeable state \
+              (possible conflicts or missing checks)."
+            echo "$ERROR_MSG"
             exit 1
-
           else
             echo "PR is ready for review!"
           fi
