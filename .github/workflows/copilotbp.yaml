@@ -12,13 +12,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
       - name: Set Branch Protections
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |-
           BRANCH="main"
 
-          # Create JSON objects for the branch protection fields
+          # Create JSON payloads for branch protection settings
           STATUS_CHECKS_JSON=$(jq -n '{
             strict: true,
             contexts: ["Super Linter"]
@@ -31,14 +33,25 @@ jobs:
 
           RESTRICTIONS_JSON=$(jq -n '{}')  # Empty object for no user restrictions
 
+          # Full branch protection payload
+          BRANCH_PROTECTION_PAYLOAD=$(jq -n \
+            --argjson status_checks "$STATUS_CHECKS_JSON" \
+            --argjson reviews "$PR_REVIEWS_JSON" \
+            --argjson restrictions "$RESTRICTIONS_JSON" \
+            '{
+              required_status_checks: $status_checks,
+              enforce_admins: true,
+              required_pull_request_reviews: $reviews,
+              restrictions: $restrictions,
+              allow_force_pushes: false,
+              allow_deletions: false,
+              required_linear_history: true
+            }'
+          )
+
           echo "Setting branch protection for branch: ${BRANCH}"
           gh api --method PUT \
             -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
             "/repos/${{ github.repository }}/branches/${BRANCH}/protection" \
-            -F required_status_checks="$STATUS_CHECKS_JSON" \
-            -F enforce_admins=true \
-            -F required_pull_request_reviews="$PR_REVIEWS_JSON" \
-            -F restrictions="$RESTRICTIONS_JSON" \
-            -F allow_force_pushes=false \
-            -F allow_deletions=false \
-            -F required_linear_history=true
+            -d "$BRANCH_PROTECTION_PAYLOAD"
