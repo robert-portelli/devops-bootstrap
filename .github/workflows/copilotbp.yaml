@@ -1,6 +1,6 @@
 ---
 name: Set Branch Protections
-on:  # yamllint disable-line rule:truthy
+on:
   push:
     branches:
       - "**"
@@ -22,8 +22,8 @@ jobs:
             "/repos/${{ github.repository }}/branches/${BRANCH}/protection" \
             -f required_status_checks='{"strict":true,"contexts":["Super Linter"]}' \
             -f enforce_admins=true \
-            -f required_pull_request_reviews=\
-            '{"required_approving_review_count":1,"dismiss_stale_reviews":true}' \
+            -f required_pull_request_reviews='{"required_approving_review_count":1,'\
+            '"dismiss_stale_reviews":true}' \
             -f restrictions='null' \
             -f allow_force_pushes=false \
             -f allow_deletions=false \
