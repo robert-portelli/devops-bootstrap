@@ -9,6 +9,10 @@ on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
 env:
   GH_TOKEN: ${{ github.token }}  # Set globally
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
 jobs:
   setup-and-test:
     runs-on: ubuntu-latest
