@@ -1,0 +1,30 @@
+---
+name: Set Branch Protections
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+jobs:
+  set-branch-protections:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set Branch Protections
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |-
+          BRANCH="main"
+          gh api --method PUT \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/branches/${BRANCH}/protection" \
+            -f required_status_checks='{"strict":true,"contexts":["Super Linter"]}' \
+            -f enforce_admins=true \
+            -f required_pull_request_reviews=\
+            '{"required_approving_review_count":1,"dismiss_stale_reviews":true}' \
+            -f restrictions='null' \
+            -f allow_force_pushes=false \
+            -f allow_deletions=false \
+            -f required_linear_history=true
