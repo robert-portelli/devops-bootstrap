@@ -30,12 +30,12 @@ jobs:
           PR_REVIEWS_JSON=$(jq -n 'null')
 
           # Restrictions must be an object with empty arrays for users and teams
-          RESTRICTIONS_JSON=$(jq -n '{users: [], teams: []}')
+          RESTRICTIONS=null
 
           BRANCH_PROTECTION_PAYLOAD=$(jq -n \
             --argjson status_checks "$STATUS_CHECKS_JSON" \
             --argjson reviews "$PR_REVIEWS_JSON" \
-            --argjson restrictions "$RESTRICTIONS_JSON" \
+            --argjson restrictions "$RESTRICTIONS" \
             '{
               required_status_checks: $status_checks,
               enforce_admins: false,
