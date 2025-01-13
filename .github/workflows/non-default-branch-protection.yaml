@@ -3,11 +3,9 @@
 name: "Non-Default Branch Protections"
 on:
   push:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+    branches-ignore:
+      - main
+  create:
   workflow_dispatch:
 jobs:
   set-non-default-branch-protections:
