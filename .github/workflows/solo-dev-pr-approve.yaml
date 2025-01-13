@@ -96,17 +96,44 @@ jobs:
           fi
   auto-approve-pr:
     runs-on: ubuntu-latest
-    needs: check-reviewer-count
-    if: needs.check-reviewer-count.result == 'success'
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
-      - name: Auto-approve the pull request
+      - name: Generate JWT and Installation Token
+        id: generate-token
         env:
-          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          PRIVATE_KEY: ${{ secrets.AUTO_APPROVE_PRIVATE_KEY }}  # Private key as a secret
+          APP_ID: ${{ secrets.GITHUB_APP_ID }}  # App ID as a secret
         run: |-
-          # Uncomment this line to use the dynamic input after debugging
-          # PR_NUMBER=${{ inputs.pr_number }}
+          # Decode the private key and save it to a file
+          echo "$PRIVATE_KEY" | base64 --decode > private-key.pem
+
+          HEADER=$(echo -n '{"alg":"RS256","typ":"JWT"}' | base64 | tr -d '=')
+          ISSUED_AT=$(date +%s)
+          EXPIRATION=$((ISSUED_AT + 600))  # 10-minute expiration for JWT
+
+          PAYLOAD=$(echo -n "{\"iat\":$ISSUED_AT,\"exp\":$EXPIRATION,\"iss\":$APP_ID}" | \
+            base64 | tr -d '=')
+
+          SIGNATURE=$(printf "%s.%s" "$HEADER" "$PAYLOAD" | openssl dgst -binary -sha256 \
+            -sign private-key.pem | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+
+          JWT="$HEADER.$PAYLOAD.$SIGNATURE"
+          echo "Generated JWT: $JWT"
+
+          INSTALLATION_ID=$(gh api /app/installations --jq '.[0].id')
+          POST_STRING="/app/installations/$INSTALLATION_ID/access_tokens"
+          TOKEN=$(gh api --method POST "$POST_STRING" \
+            -H "Authorization: Bearer $JWT" \
+            -H "Accept: application/vnd.github+json" | jq -r '.token')
+
+          echo "APP_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+      - name: Approve the pull request
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_APPROVE_PRIVATE_KEY }}
+        run: |-
+          # commented out for debugging
+          #PR_NUMBER="${{ github.event.inputs.pr_number }}"
           PR_NUMBER=22  # temporary for debugging
           echo "Approving pull request #$PR_NUMBER"
           BODY="Auto-approved by solo developer workflow."
