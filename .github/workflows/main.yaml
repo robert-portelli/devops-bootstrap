@@ -8,7 +8,7 @@ on:  # yamllint disable-line rule:truthy
   pull_request:
   workflow_dispatch:
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set globally
+  GH_TOKEN: ${{ github.token }}  # Set globally
 jobs:
   setup-and-test:
     runs-on: ubuntu-latest
