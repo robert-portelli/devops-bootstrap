@@ -28,8 +28,7 @@ runs:
     - name: Apply Branch Protection Rules
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
-        GH_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ github.token }}
       run: |-
         branch="${{ steps.determine-branch.outputs.branch }}"
 
