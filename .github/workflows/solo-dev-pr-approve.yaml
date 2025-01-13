@@ -9,6 +9,7 @@ on:  # yamllint disable-line rule:truthy
         description: "The pull request number to be checked"
         required: true
         type: number
+  pull_request:
 jobs:
   check-pr-readiness:
     runs-on: ubuntu-latest
