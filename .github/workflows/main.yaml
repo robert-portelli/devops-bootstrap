@@ -8,7 +8,7 @@ on:  # yamllint disable-line rule:truthy
   pull_request:
   workflow_dispatch:
 env:
-  GH_TOKEN: ${{ github.token }}  # Set globally
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 permissions:
   contents: write
   pull-requests: write
@@ -44,4 +44,4 @@ jobs:
         uses: ./.github/actions/branch-protection
         with:
           is_default_branch: ${{ matrix.is_default_branch }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
