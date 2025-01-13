@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
       - name: Set Branch Protections
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -21,16 +19,23 @@ jobs:
           BRANCH="main"
 
           # Create JSON payloads for branch protection settings
-          STATUS_CHECKS_JSON=$(jq -n '{strict: true, contexts: ["Super Linter"]}')
-          PR_REVIEWS_JSON=\
-          $(jq -n '{required_approving_review_count: 1, dismiss_stale_reviews: true}')
-          RESTRICTIONS_JSON=$(jq -n '{}')  # Empty object for no user restrictions
+          STATUS_CHECKS_JSON=$(jq -n '{
+            strict: true,
+            contexts: ["Super Linter"]
+          }')
+
+          PR_REVIEWS_JSON=$(jq -n '{
+            required_approving_review_count: 1,
+            dismiss_stale_reviews: true
+          }')
+
+          RESTRICTIONS=null  # No user restrictions
 
           # Full branch protection payload
           BRANCH_PROTECTION_PAYLOAD=$(jq -n \
             --argjson status_checks "$STATUS_CHECKS_JSON" \
             --argjson reviews "$PR_REVIEWS_JSON" \
-            --argjson restrictions "$RESTRICTIONS_JSON" \
+            --argjson restrictions "$RESTRICTIONS" \
             '{
               required_status_checks: $status_checks,
               enforce_admins: true,
@@ -42,11 +47,11 @@ jobs:
             }'
           )
 
+          # Save payload to file for gh api input
           echo "$BRANCH_PROTECTION_PAYLOAD" > payload.json
 
           echo "Setting branch protection for branch: ${BRANCH}"
           gh api --method PUT \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
             "/repos/${{ github.repository }}/branches/${BRANCH}/protection" \
             --input payload.json
