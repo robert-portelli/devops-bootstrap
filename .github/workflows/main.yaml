@@ -7,6 +7,8 @@ on:  # yamllint disable-line rule:truthy
       - '**'
   pull_request:
   workflow_dispatch:
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   setup-and-test:
     runs-on: ubuntu-latest
@@ -26,21 +28,15 @@ jobs:
             pacman-cache-${{ runner.os }}-
       - name: Run BATS Tests
         run: bats test/test_common_setup.bats
-  protect-default-branch:
+  protect-branches:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        is_default_branch: ["true", "false"]
     steps:
-      - uses: actions/checkout@v4
-      - name: Set Protection for Default Branch
+      - name: Check out Code
+        uses: actions/checkout@v4
+      - name: Apply Branch Protection
         uses: ./.github/actions/branch-protection
         with:
-          is_default_branch: "true"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-  protect-non-default-branch:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set Protection for Non-Default Branch
-        uses: ./.github/actions/branch-protection
-        with:
-          is_default_branch: "false"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          is_default_branch: ${{ matrix.is_default_branch }}
