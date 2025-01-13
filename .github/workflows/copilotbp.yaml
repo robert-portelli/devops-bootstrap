@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Set Branch Protections
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |-
           BRANCH="main"
           PR_REVIEWS=$(jq -n \
