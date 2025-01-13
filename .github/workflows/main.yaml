@@ -13,6 +13,8 @@ jobs:
     container:
       image: archlinux:base-devel
     steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
       - name: Environment Setup
         uses: ./.github/actions/setup-environment
       - name: Restore Pacman Cache
@@ -22,7 +24,5 @@ jobs:
           key: pacman-cache-${{ runner.os }}-${{ hashFiles('build.yml') }}
           restore-keys: |-
             pacman-cache-${{ runner.os }}-
-      - name: Check out Code
-        uses: actions/checkout@v4
       - name: Run BATS Tests
         run: bats test/_common_setup_test.bats
