@@ -8,6 +8,9 @@ inputs:
       for non-default branches."
     required: true
     default: "false"
+  github-token:
+    description: "GitHub token for authentication"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -25,7 +28,7 @@ runs:
     - name: Apply Branch Protection Rules
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |-
         branch="${{ steps.determine-branch.outputs.branch }}"
         if [[ "${{ inputs.is_default_branch }}" == "true" ]]; then

@@ -34,6 +34,7 @@ jobs:
         uses: ./.github/actions/branch-protection
         with:
           is_default_branch: "true"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
   protect-non-default-branch:
     runs-on: ubuntu-latest
     steps:
@@ -42,3 +43,4 @@ jobs:
         uses: ./.github/actions/branch-protection
         with:
           is_default_branch: "false"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
