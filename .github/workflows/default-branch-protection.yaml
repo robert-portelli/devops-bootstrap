@@ -3,9 +3,12 @@ name: Set Default Branch Protections
 on:
   push:
     branches:
-      - "**"
+      - main  # Ensures branch protection settings are reapplied when main is updated
   pull_request:
-  workflow_dispatch:  # usage: gh workflow run <workflow_name> --ref <branch_name>
+    types:
+      - opened
+      - reopened  # Trigger when a PR to main is opened or reopened
+  workflow_dispatch:  # Manual trigger for extra flexibility
 jobs:
   set-default-branch-protections:
     runs-on: ubuntu-latest
