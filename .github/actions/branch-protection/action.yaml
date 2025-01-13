@@ -8,9 +8,9 @@ inputs:
       for non-default branches."
     required: true
     default: "false"
-  GH_TOKEN:
-    description: "GitHub token to authorize the API request."
-    required: true
+#  GH_TOKEN:
+#    description: "GitHub token to authorize the API request."
+#    required: true
 runs:
   using: "composite"
   steps:
@@ -27,8 +27,8 @@ runs:
         fi
     - name: Apply Branch Protection Rules
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.GH_TOKEN }}  # Use the global environment variable
+      #      env:
+      #        GH_TOKEN: ${{ inputs.GH_TOKEN }}  # Use the global environment variable
       run: |-
         branch="${{ steps.determine-branch.outputs.branch }}"
 

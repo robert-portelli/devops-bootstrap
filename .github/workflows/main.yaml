@@ -44,4 +44,4 @@ jobs:
         uses: ./.github/actions/branch-protection
         with:
           is_default_branch: ${{ matrix.is_default_branch }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
