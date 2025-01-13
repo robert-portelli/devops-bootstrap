@@ -17,17 +17,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |-
           BRANCH="main"
-          PR_REVIEWS=$(jq -n \
-            --argjson count 1 \
-            --argjson dismiss true \
-            '{required_approving_review_count: $count, dismiss_stale_reviews: $dismiss}')
+
+          # Create JSON objects for the branch protection fields
+          STATUS_CHECKS_JSON=$(jq -n '{
+            strict: true,
+            contexts: ["Super Linter"]
+          }')
+
+          PR_REVIEWS_JSON=$(jq -n '{
+            required_approving_review_count: 1,
+            dismiss_stale_reviews: true
+          }')
+
+          RESTRICTIONS_JSON=$(jq -n '{}')  # Empty object for no user restrictions
+
+          echo "Setting branch protection for branch: ${BRANCH}"
           gh api --method PUT \
             -H "Accept: application/vnd.github+json" \
             "/repos/${{ github.repository }}/branches/${BRANCH}/protection" \
-            -F required_status_checks='{"strict":true,"contexts":["Super Linter"]}' \
+            -F required_status_checks="$STATUS_CHECKS_JSON" \
             -F enforce_admins=true \
-            -F required_pull_request_reviews="$PR_REVIEWS" \
-            -F restrictions='{}' \
+            -F required_pull_request_reviews="$PR_REVIEWS_JSON" \
+            -F restrictions="$RESTRICTIONS_JSON" \
             -F allow_force_pushes=false \
             -F allow_deletions=false \
             -F required_linear_history=true
