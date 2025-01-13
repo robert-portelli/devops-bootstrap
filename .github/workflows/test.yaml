@@ -3,6 +3,10 @@
 name: Test Workflow
 on:  # yamllint disable-line rule:truthy
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
   workflow_dispatch:
 jobs:
   setup-environment-and-run-tests:
