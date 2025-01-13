@@ -94,3 +94,20 @@ jobs:
           else
             echo "Solo developer detected. Proceeding with auto-approval."
           fi
+  auto-approve-pr:
+    runs-on: ubuntu-latest
+    needs: check-reviewer-count
+    if: needs.check-reviewer-count.result == 'success'
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Auto-approve the pull request
+        env:
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |-
+          # Uncomment this line to use the dynamic input after debugging
+          # PR_NUMBER=${{ inputs.pr_number }}
+          PR_NUMBER=22  # temporary for debugging
+          echo "Approving pull request #$PR_NUMBER"
+          BODY="Auto-approved by solo developer workflow."
+          gh pr review "$PR_NUMBER" --approve --body "$BODY"
