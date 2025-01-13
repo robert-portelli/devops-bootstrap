@@ -26,3 +26,17 @@ jobs:
             pacman-cache-${{ runner.os }}-
       - name: Run BATS Tests
         run: bats test/test_common_setup.bats
+  protect-default-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Protection for Default Branch
+        uses: ./.github/actions/branch-protection
+        with:
+          is_default_branch: "true"
+  protect-non-default-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Protection for Non-Default Branch
+        uses: ./.github/actions/branch-protection
+        with:
+          is_default_branch: "false"
