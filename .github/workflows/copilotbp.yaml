@@ -21,16 +21,9 @@ jobs:
           BRANCH="main"
 
           # Create JSON payloads for branch protection settings
-          STATUS_CHECKS_JSON=$(jq -n '{
-            strict: true,
-            contexts: ["Super Linter"]
-          }')
-
-          PR_REVIEWS_JSON=$(jq -n '{
-            required_approving_review_count: 1,
-            dismiss_stale_reviews: true
-          }')
-
+          STATUS_CHECKS_JSON=$(jq -n '{strict: true, contexts: ["Super Linter"]}')
+          PR_REVIEWS_JSON=\
+          $(jq -n '{required_approving_review_count: 1, dismiss_stale_reviews: true}')
           RESTRICTIONS_JSON=$(jq -n '{}')  # Empty object for no user restrictions
 
           # Full branch protection payload
@@ -49,9 +42,11 @@ jobs:
             }'
           )
 
+          echo "$BRANCH_PROTECTION_PAYLOAD" > payload.json
+
           echo "Setting branch protection for branch: ${BRANCH}"
           gh api --method PUT \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             "/repos/${{ github.repository }}/branches/${BRANCH}/protection" \
-            -d "$BRANCH_PROTECTION_PAYLOAD"
+            --input payload.json
