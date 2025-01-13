@@ -29,3 +29,35 @@ jobs:
             echo "Error: Only the repository owner can trigger this workflow."
             exit 1
           fi
+  pr-readiness-check:
+    runs-on: ubuntu-latest
+    needs: check-pr-readiness
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Fetch pull request details
+        id: pr-details
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          PR_STATUS=$(gh pr view \
+          ${{ github.event.inputs.pr_number }} \
+          --json state,mergeable --jq '{state: .state, mergeable: .mergeable}')
+          echo "PR_STATUS=$PR_STATUS" >> "$GITHUB_ENV"
+      - name: Validate PR state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          if [[ "$(echo "$PR_STATUS" | jq -r '.state')" != "OPEN" ]]; then
+            echo "Error: PR is not open for review."
+            exit 1
+          fi
+
+          if [[ "$(echo "$PR_STATUS" | jq -r '.mergeable')" != "MERGEABLE" ]]; then
+            echo "Error: PR is not in a mergeable state \
+            (possible conflicts or missing checks)."
+            exit 1
+
+          else
+            echo "PR is ready for review!"
+          fi
