@@ -25,8 +25,12 @@ jobs:
           echo "Setting branch protection for branch: ${BRANCH}"
 
           STATUS_CHECKS_JSON=$(jq -n '{strict: false, contexts: []}')
+
+          # Set PR reviews to null if not required
           PR_REVIEWS_JSON=$(jq -n 'null')
-          RESTRICTIONS_JSON=$(jq -n '{}')  # No user restrictions
+
+          # Restrictions must be an object with empty arrays for users and teams
+          RESTRICTIONS_JSON=$(jq -n '{users: [], teams: []}')
 
           BRANCH_PROTECTION_PAYLOAD=$(jq -n \
             --argjson status_checks "$STATUS_CHECKS_JSON" \
