@@ -25,4 +25,4 @@ jobs:
           restore-keys: |-
             pacman-cache-${{ runner.os }}-
       - name: Run BATS Tests
-        run: bats test/_common_setup_test.bats
+        run: bats test/test_common_setup.bats
