@@ -28,7 +28,7 @@ runs:
     - name: Apply Branch Protection Rules
       shell: bash
       env:
-        GH_TOKEN: ${{ inputs.github-token }}  # Use the global environment variable
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}  # Use the global environment variable
       run: |-
         branch="${{ steps.determine-branch.outputs.branch }}"
 
