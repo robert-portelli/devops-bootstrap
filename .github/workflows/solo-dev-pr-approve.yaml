@@ -1,0 +1,29 @@
+---
+# Filename: .github/workflows/solo-dev-pr-approve.yaml
+name: "Solo Dev PR Approval Workflow"
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "The pull request number to be checked"
+        required: true
+        type: number
+jobs:
+  check-pr-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Get repository owner and actor
+        id: owner-check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          REPO_OWNER=$(gh api repos/${{ github.repository }} --jq '.owner.login')
+          echo "Repository Owner: $REPO_OWNER"
+          echo "Triggered by: ${{ github.actor }}"
+
+          if [[ "$REPO_OWNER" != "${{ github.actor }}" ]]; then
+            echo "Error: Only the repository owner can trigger this workflow."
+            exit 1
+          fi
