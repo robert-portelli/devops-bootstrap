@@ -29,6 +29,7 @@ jobs:
   protect-default-branch:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Set Protection for Default Branch
         uses: ./.github/actions/branch-protection
         with:
@@ -36,6 +37,7 @@ jobs:
   protect-non-default-branch:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Set Protection for Non-Default Branch
         uses: ./.github/actions/branch-protection
         with:
