@@ -5,14 +5,14 @@ on:
     branches:
       - "**"
   pull_request:
-  workflow_dispatch:
+  workflow_dispatch:  # usage: gh workflow run <workflow_name> --ref <branch_name>
 jobs:
-  set-branch-protections:
+  set-default-branch-protections:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Set Branch Protections
+      - name: Set Default Branch Protections
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |-
