@@ -8,7 +8,7 @@ inputs:
       for non-default branches."
     required: true
     default: "false"
-  github-token:
+  GH_TOKEN:
     description: "GitHub token to authorize the API request."
     required: true
 runs:
@@ -29,6 +29,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
       run: |-
         branch="${{ steps.determine-branch.outputs.branch }}"
 
