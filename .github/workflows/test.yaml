@@ -1,0 +1,26 @@
+---
+# Filename: .github/workflows/test.yaml
+name: Test Workflow
+on:  # yamllint disable-line rule:truthy
+  pull_request:
+  workflow_dispatch:
+jobs:
+  setup-environment-and-run-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
+      - name: Environment Setup
+        uses: ./.github/actions/setup-environment
+      - name: Restore Pacman Cache
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/pacman/pkg
+          key: pacman-cache-${{ runner.os }}-${{ hashFiles('build.yml') }}
+          restore-keys: |-
+            pacman-cache-${{ runner.os }}-
+      - name: Test BATS common setups
+        run: bats test/test_common_setup.bats
+        # add tests below
