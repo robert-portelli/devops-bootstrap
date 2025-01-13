@@ -8,9 +8,6 @@ inputs:
       for non-default branches."
     required: true
     default: "false"
-  GH_TOKEN:
-    description: "GitHub token to authorize the API request."
-    required: true
 runs:
   using: "composite"
   steps:
@@ -28,10 +25,11 @@ runs:
     - name: Apply Branch Protection Rules
       shell: bash
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ env.GH_TOKEN }}  # Use the global environment variable
       run: |-
         branch="${{ steps.determine-branch.outputs.branch }}"
 
+        # Define JSON strings for branch protection settings
         if [[ "${{ inputs.is_default_branch }}" == "true" ]]; then
           strict_contexts='["Super Linter"]'
           required_reviews=1
@@ -46,12 +44,13 @@ runs:
           required_linear_history="false"
         fi
 
-        echo "Setting branch protection for branch: ${branch}"
-
-        # Define JSON strings to avoid long lines and improve readability
+        # Define JSON payloads for status checks and pull request reviews
         status_checks_json="{\"strict\":true,\"contexts\":${strict_contexts}}"
         reviews_json="{\"required_approving_review_count\":${required_reviews},\"dismiss_stale_reviews\":true}"
 
+        echo "Setting branch protection for branch: ${branch}"
+
+        # Perform API request to set branch protection
         gh api --method PUT \
           -H "Accept: application/vnd.github+json" \
           "/repos/${{ github.repository }}/branches/${branch}/protection" \
