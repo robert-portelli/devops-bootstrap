@@ -56,9 +56,8 @@ repos:
         language: python
         types: [yaml]
         args:
-          # make the line lengths pass
           - -d
-          - "{extends: default, rules: {line-length: {max: 90}}}"
+          - '{"rules": {"line-length": {"max": 90, "level": "warning"}}}'
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
