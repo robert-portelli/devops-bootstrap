@@ -35,17 +35,6 @@ repos:
           - -formatter=trim_trailing_whitespace=true
           - -formatter=eof_newline=true
           - -formatter=gitignore_path=".gitignore"
-  - repo: local
-    hooks:
-      - id: smoked-pc-config-check
-        name: Pre-Commit Config Smoke Test
-        description: Validate .pre-commit-config.yaml against .ST-pre-commit-config.yaml
-          files.
-        entry: bin/smoked-pc-config/main.sh
-        language: system
-        pass_filenames: false  # Prevent passing file paths since the script handles
-        # them internally.
-        always_run: true  # Ensures the hook runs even if no files have changed.
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.35.1
     hooks:
@@ -58,14 +47,8 @@ repos:
         args:
           # make the line lengths pass
           - -d
-          - "{extends: default, rules: {line-length: {max: 90}}}"
-          # extends: default
+          - "{extends: default, rules: {line-length: {max: 80}}}"
   - repo: https://github.com/codespell-project/codespell
-    #        rules:
-    #          line-length:
-    #            max: 80
-    #            allow-non-breakable-inline-comments: true  # allows disable-line comments
-
     rev: v2.3.0
     hooks:
       - id: codespell
@@ -148,3 +131,15 @@ repos:
         language: node
         files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
         types: [file]
+  - repo: local
+    hooks:
+      - id: smoked-pc-config-check
+        name: Pre-Commit Config Smoke Test
+        # yamllint disable-line rule:line-length
+        description: Validate .pre-commit-config.yaml against .ST-pre-commit-config.yaml
+          files.
+        entry: bin/smoked-pc-config/main.sh
+        language: system
+        # Prevent passing file paths since the script handles them internally.
+        pass_filenames: false
+        always_run: true  # Ensures the hook runs even if no files have changed.
