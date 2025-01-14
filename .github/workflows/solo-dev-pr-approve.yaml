@@ -96,6 +96,7 @@ jobs:
           fi
   auto-approve-pr:
     runs-on: ubuntu-latest
+    needs: check-reviewer-count
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
