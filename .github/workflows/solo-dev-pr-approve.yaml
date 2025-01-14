@@ -105,7 +105,8 @@ jobs:
           PRIVATE_KEY: ${{ secrets.AUTO_APPROVE_PRIVATE_KEY }}
           APP_ID: ${{ secrets.AUTO_APPROVE_APP_ID }}
         run: |-
-          echo "$PRIVATE_KEY" private-key.pem
+          echo "$PRIVATE_KEY" > private-key.pem
+          chmod 600 private-key.pem
 
           HEADER=$(echo -n '{"alg":"RS256","typ":"JWT"}' | base64 | tr -d '=')
           ISSUED_AT=$(date +%s)
@@ -125,7 +126,9 @@ jobs:
             -H "Authorization: Bearer $JWT" \
             -H "Accept: application/vnd.github+json" | jq -r '.token')
 
+          # Set the GitHub CLI token to use the generated installation token
           echo "APP_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          echo "GH_TOKEN=$TOKEN" >> "$GITHUB_ENV"  # To make gh cli recognize the token
       - name: Approve the pull request
         env:
           GH_TOKEN: ${{ env.APP_TOKEN }}
