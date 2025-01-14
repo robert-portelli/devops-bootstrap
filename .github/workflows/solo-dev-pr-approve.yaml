@@ -9,7 +9,6 @@ on:  # yamllint disable-line rule:truthy
         description: "The pull request number to be checked"
         required: true
         type: number
-  pull_request:  # temporary for debugging
 jobs:
   check-pr-readiness:
     runs-on: ubuntu-latest
@@ -40,9 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |-
-          # Uncomment to use dynamic input
-          # PR_NUMBER="${{ inputs.pr_number }}"
-          PR_NUMBER=22  # Temporary hardcoded value for debugging
+          PR_NUMBER="${{ inputs.pr_number }}"
           echo "Fetching details for PR number: $PR_NUMBER"
 
           # Fetch PR details and save to file
@@ -113,7 +110,6 @@ jobs:
           HEADER=$(echo -n '{"alg":"RS256","typ":"JWT"}' | base64 | tr -d '=')
           ISSUED_AT=$(date +%s)
           EXPIRATION=$((ISSUED_AT + 600))
-          # yamllint disable-line rule:line-length
           PAYLOAD=$(echo -n "{\"iat\":$ISSUED_AT,\"exp\":$EXPIRATION,\"iss\":$APP_ID}" | base64 | tr -d '=')
 
           SIGNATURE=$(printf "%s.%s" "$HEADER" "$PAYLOAD" | openssl dgst -binary -sha256 \
@@ -123,7 +119,6 @@ jobs:
 
           INSTALLATION_ID=$(gh api /app/installations -H "Authorization: Bearer $JWT" \
             --jq '.[] | select(.account.login == "'${{ github.repository_owner }}'").id')
-          # yamllint disable-line rule:line-length
           TOKEN=$(gh api --method POST "/app/installations/$INSTALLATION_ID/access_tokens" \
             -H "Authorization: Bearer $JWT" \
             -H "Accept: application/vnd.github+json" | jq -r '.token')
@@ -135,9 +130,7 @@ jobs:
         env:
           GH_TOKEN: ${{ env.APP_TOKEN }}
         run: |-
-          # Uncomment after debugging
-          # PR_NUMBER="${{ inputs.pr_number }}"
-          PR_NUMBER=22  # temporary for debugging
+          PR_NUMBER="${{ inputs.pr_number }}"
           echo "Approving pull request #$PR_NUMBER"
           BODY="Auto-approved by solo developer workflow."
 
