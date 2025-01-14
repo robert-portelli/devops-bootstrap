@@ -1,0 +1,66 @@
+---
+# Filename: .github/actions/branch-protection/action.yaml
+name: "Set Branch Protection"
+description: "Sets branch protection rules for default and non-default branches"
+inputs:
+  is_default_branch:
+    description: "Set to 'true' to apply default branch protection rules. 'false'
+      for non-default branches."
+    required: true
+    default: "false"
+#  GH_TOKEN:
+#    description: "GitHub token to authorize the API request."
+#    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Determine Branch for Protection
+      id: determine-branch
+      shell: bash
+      run: |
+        if [[ "${{ inputs.is_default_branch }}" == "true" ]]; then
+          echo "Applying protection to default branch..."
+          echo "branch=${{ github.event.repository.default_branch }}" >> $GITHUB_OUTPUT
+        else
+          echo "Applying protection to non-default branch..."
+          echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+        fi
+    - name: Apply Branch Protection Rules
+      shell: bash
+      #      env:
+      #        GH_TOKEN: ${{ inputs.GH_TOKEN }}  # Use the global environment variable
+      run: |-
+        branch="${{ steps.determine-branch.outputs.branch }}"
+
+        # Define JSON strings for branch protection settings
+        if [[ "${{ inputs.is_default_branch }}" == "true" ]]; then
+          strict_contexts='["Super Linter"]'
+          required_reviews=1
+          allow_force_pushes="false"
+          allow_deletions="false"
+          required_linear_history="true"
+        else
+          strict_contexts='[]'
+          required_reviews="null"
+          allow_force_pushes="true"
+          allow_deletions="true"
+          required_linear_history="false"
+        fi
+
+        # Define JSON payloads for status checks and pull request reviews
+        status_checks_json="{\"strict\":true,\"contexts\":${strict_contexts}}"
+        reviews_json="{\"required_approving_review_count\":${required_reviews},\"dismiss_stale_reviews\":true}"
+
+        echo "Setting branch protection for branch: ${branch}"
+
+        # Perform API request to set branch protection
+        gh api --method PUT \
+          -H "Accept: application/vnd.github+json" \
+          "/repos/${{ github.repository }}/branches/${branch}/protection" \
+          -F required_status_checks="${status_checks_json}" \
+          -F enforce_admins=false \
+          -F required_pull_request_reviews="${reviews_json}" \
+          -F restrictions="null" \
+          -F allow_force_pushes="${allow_force_pushes}" \
+          -F allow_deletions="${allow_deletions}" \
+          -F required_linear_history="${required_linear_history}"

@@ -1,0 +1,21 @@
+---
+# .github/actions/setup-environment/action.yaml
+name: "Environment Setup"
+description: "Sets up Arch Linux with required tools"
+inputs: {}
+outputs: {}
+runs:
+  using: "composite"
+  steps:
+    - name: Initialize and Update System
+      run: |
+        pacman-key --init
+        pacman-key --populate archlinux
+        pacman -Syu --noconfirm
+      shell: bash
+    - name: Install Node.js
+      run: pacman -S --noconfirm nodejs npm
+      shell: bash
+    - name: Install BATS and Related Tools
+      run: pacman -S --noconfirm bats bats-assert bats-file bats-support
+      shell: bash

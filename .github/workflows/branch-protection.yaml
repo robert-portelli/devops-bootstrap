@@ -3,7 +3,7 @@
 name: Set Branch Protection
 on:  # yamllint disable-line rule:truthy
   create:
-  workflow_dispatch:
+  workflow_call:
 jobs:
   protect-default-branch:
     # yamllint disable-line rule:line-length
