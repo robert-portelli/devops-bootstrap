@@ -47,7 +47,9 @@ repos:
         args:
           # make the line lengths pass
           - -d
-          - "{extends: default, rules: {line-length: {max: 88}}}"
+          # yamllint disable-line rule:line-length
+          - "{extends: default, rules: { line-length: { max: 88, allow-non-breakable-inline-mappings:
+            true } } }"
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
