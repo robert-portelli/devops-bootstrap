@@ -105,6 +105,7 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.AUTO_APPROVE_PRIVATE_KEY }}
           APP_ID: ${{ secrets.AUTO_APPROVE_APP_ID }}
+          GH_TOKEN: ${{ github.token }}
         run: |-
           echo "$PRIVATE_KEY" > private-key.pem
           chmod 600 private-key.pem
