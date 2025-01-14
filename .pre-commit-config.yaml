@@ -23,14 +23,14 @@ repos:
     hooks:
       - id: yamlfmt
         name: YAML Formatter (yamlfmt)
-        description: Formats YAML files using Google's yamlfmt with inline
-          configuration options.
+        description: Formats YAML files using Google's yamlfmt with inline configuration
+          options.
         language: golang
         types: [yaml]
         args:
           - -formatter=include_document_start=true
           - -formatter=indent=2
-          - -formatter=max_line_length=70
+          - -formatter=max_line_length=80
           - -formatter=pad_line_comments=2
           - -formatter=trim_trailing_whitespace=true
           - -formatter=eof_newline=true
@@ -40,14 +40,14 @@ repos:
     hooks:
       - id: yamllint
         name: YAML Linter (yamllint)
-        description: Lints YAML files to catch errors and ensure consistency
-          according to YAML style conventions.
+        description: Lints YAML files to catch errors and ensure consistency according
+          to YAML style conventions.
         language: python
         types: [yaml]
         args:
           # make the line lengths pass
           - -d
-          - "{extends: default, rules: {line-length: {max: 80}}}"
+          - "{extends: default, rules: {line-length: {max: 88}}}"
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
@@ -90,9 +90,9 @@ repos:
     hooks:
       - id: pyupgrade
         name: PyUpgrade Python Syntax Updater
-        description: This hook automatically upgrades Python syntax to the
-          latest version, improving readability and ensuring compatibility
-          with modern Python features.
+        description: This hook automatically upgrades Python syntax to the latest
+          version, improving readability and ensuring compatibility with modern Python
+          features.
         entry: pyupgrade
         language: python
         types: [python]
@@ -102,8 +102,8 @@ repos:
     hooks:
       - id: add-trailing-comma
         name: Add Trailing Comma Formatter
-        description: This hook adds trailing commas where appropriate in
-          Python code, improving diffs and adhering to PEP 8 recommendations.
+        description: This hook adds trailing commas where appropriate in Python code,
+          improving diffs and adhering to PEP 8 recommendations.
         entry: add-trailing-comma
         language: python
         types: [python]
@@ -125,8 +125,8 @@ repos:
     hooks:
       - id: eslint
         name: ESLint JavaScript Linter
-        description: This hook runs ESLint for linting JavaScript and TypeScript
-          files, ensuring code quality and adherence to style guides.
+        description: This hook runs ESLint for linting JavaScript and TypeScript files,
+          ensuring code quality and adherence to style guides.
         entry: eslint
         language: node
         files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
