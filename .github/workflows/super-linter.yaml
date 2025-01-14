@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   lint:
-    name: Lint Codebase
+    name: Super Linter
     runs-on: ubuntu-latest
     permissions:
       contents: read
