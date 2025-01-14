@@ -1,7 +1,7 @@
 ---
 # Filename: .github/workflows/solo-dev-pr-approve.yaml
 name: "Solo Dev PR Approval Workflow"
-on:  # yamllint disable-line rule:truthy
+on:
   # usage: gh workflow run solo-dev-pr-approve.yaml --field pr_number=<>
   workflow_dispatch:
     inputs:
