@@ -81,14 +81,13 @@ assets_define() {
     git_repo=$(git rev-parse --show-toplevel)
 
     ASSETS[git_repo]="$git_repo"
-#TODO, assess below:
-    ASSETS[workflow]="${git_repo}/test/smoke-test/.github/actions/environment-setup/test-workflow-for-action.yaml"
+    ASSETS[workflow]="${git_repo}/.github/workflows/solo-dev-pr-approve.yaml"
     ASSETS[imagename]="robertportelli/my-custom-act-image:latest"
     ASSETS[dockerimage]="ubuntu-latest=${ASSETS[imagename]}"
     ASSETS[imagepath]="${git_repo}/docker-custom-act/Dockerfile"
-    ASSETS[actioncache]="${git_repo}/test/smoke-test/.cache/act"
-    ASSETS[cacheserverpath]="${git_repo}/test/smoke-test/.cache/actcache"
-    ASSETS[cacheserveraddr]="127.0.0.1"
+    #ASSETS[actioncache]="${git_repo}/test/smoke-test/.cache/act"
+    #ASSETS[cacheserverpath]="${git_repo}/test/smoke-test/.cache/actcache"
+    #ASSETS[cacheserveraddr]="127.0.0.1"
 
     if [[ "$LOG_LEVEL" == "DEBUG" ]]; then
         assets_log
@@ -120,15 +119,15 @@ cleanup() {
 smoke_test_solo_dev_pr_approve() {
     lm INFO "Running smoke test for solo dev pr approve workflow."
     gh act \
-        -j "test-environment-setup-action" \
+        #-j "auto-approve-pr" \
         -P "${ASSETS[dockerimage]}" \
         -W "${ASSETS[workflow]}" \
         --pull "false" \
-        --action-cache-path "${ASSETS[actioncache]}" \
-        --cache-server-path "${ASSETS[cacheserverpath]}" \
-        --cache-server-addr "${ASSETS[cacheserveraddr]}" \
-        --action-offline-mode \
-        --bind
+        #--action-cache-path "${ASSETS[actioncache]}" \
+        #--cache-server-path "${ASSETS[cacheserverpath]}" \
+        #--cache-server-addr "${ASSETS[cacheserveraddr]}" \
+        #--action-offline-mode \
+        #--bind
 }
 
 main() {
@@ -136,7 +135,7 @@ main() {
     assets_define || lm ERROR "Failed to define script assets."
     readonly -A ASSETS
     trap cleanup EXIT
-    smoke_test_environment_setup
+    smoke_test_solo_dev_pr_approve
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
