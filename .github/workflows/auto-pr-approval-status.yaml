@@ -1,0 +1,25 @@
+---
+# Filename: .github/workflows/auto-pr-approval-status.yaml
+name: "Auto PR Approval Status"
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+jobs:
+  determine-approval-status:
+    uses: ./.github/workflows/pr-qualification-check.yaml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+  set-status:
+    runs-on: ubuntu-latest
+    needs: determine-approval-status
+    steps:
+      - name: Set PR Status Message
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |-
+          echo "::notice ::Solo Developer PR Approval Instructions:"
+          echo "To approve this PR, run:"
+          echo "gh workflow run solo-dev-pr-approve.yaml --field pr_number=$PR_NUMBER"

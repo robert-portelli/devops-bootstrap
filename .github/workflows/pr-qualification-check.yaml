@@ -1,0 +1,87 @@
+---
+# Filename: .github/workflows/pr-qualification-check.yaml
+# Description: Reusable Workflow for auto-pr-approval-status.yaml and solo-dev-pr-approve.yaml
+name: "PR Qualification Check"
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: "The pull request number"
+        required: true
+        type: number
+jobs:
+  check-pr-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Get repository owner and actor
+        id: owner-check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          REPO_OWNER=$(gh api repos/${{ github.repository }} --jq '.owner.login')
+          echo "Repository Owner: $REPO_OWNER"
+          echo "Triggered by: ${{ github.actor }}"
+
+          if [[ "$REPO_OWNER" != "${{ github.actor }}" ]]; then
+            echo "Error: Only the repository owner can trigger this workflow."
+            exit 1
+          fi
+  pr-readiness-check:
+    runs-on: ubuntu-latest
+    needs: check-pr-readiness
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Create payload for PR details
+        id: pr-details
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          PR_NUMBER="${{ inputs.pr_number }}"
+          echo "Fetching details for PR number: $PR_NUMBER"
+          gh pr view "$PR_NUMBER" --json state,mergeable > pr_payload.json
+          PR_STATE=$(jq -r '.state' pr_payload.json)
+          PR_MERGEABLE=$(jq -r '.mergeable' pr_payload.json)
+          echo "PR_STATE=$PR_STATE" >> "$GITHUB_ENV"
+          echo "PR_MERGEABLE=$PR_MERGEABLE" >> "$GITHUB_ENV"
+      - name: Validate PR state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          if [[ "$PR_STATE" != "OPEN" ]]; then
+            echo "Error: PR is not open for review."
+            exit 1
+          fi
+          if [[ "$PR_MERGEABLE" != "MERGEABLE" ]]; then
+            echo "Error: PR is not in a mergeable state (possible conflicts or missing checks)."
+            exit 1
+          else
+            echo "PR is ready for review!"
+          fi
+  check-reviewer-count:
+    runs-on: ubuntu-latest
+    needs: pr-readiness-check
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Get the number of reviewers
+        id: reviewer-count
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          REVIEWERS=$(gh api -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/collaborators?affiliation=direct" \
+            --jq '[.[] | select(.permissions.push == true)] | length')
+          echo "REVIEWER_COUNT=$REVIEWERS" >> "$GITHUB_ENV"
+      - name: Validate reviewer count
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |-
+          if [[ "$REVIEWER_COUNT" -gt 1 ]]; then
+            echo "There are multiple reviewers. Manual review is required."
+            exit 1
+          else
+            echo "Solo developer detected. Proceeding with auto-approval."
+          fi
