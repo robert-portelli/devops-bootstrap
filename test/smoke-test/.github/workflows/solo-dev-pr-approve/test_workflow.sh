@@ -116,18 +116,9 @@ cleanup() {
     fi
 }
 
-smoke_test_solo_dev_pr_approve() {
+run_tests() {
     lm INFO "Running smoke test for solo dev pr approve workflow."
-    gh act \
-        #-j "auto-approve-pr" \
-        -P "${ASSETS[dockerimage]}" \
-        -W "${ASSETS[workflow]}" \
-        --pull "false" \
-        #--action-cache-path "${ASSETS[actioncache]}" \
-        #--cache-server-path "${ASSETS[cacheserverpath]}" \
-        #--cache-server-addr "${ASSETS[cacheserveraddr]}" \
-        #--action-offline-mode \
-        #--bind
+    bats test/smoke-test/.github/workflows/solo-dev-pr-approve/tests.bats
 }
 
 main() {
@@ -135,7 +126,7 @@ main() {
     assets_define || lm ERROR "Failed to define script assets."
     readonly -A ASSETS
     trap cleanup EXIT
-    smoke_test_solo_dev_pr_approve
+    run_tests
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
