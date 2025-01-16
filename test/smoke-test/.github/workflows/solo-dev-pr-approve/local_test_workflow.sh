@@ -118,7 +118,7 @@ cleanup() {
 
 run_tests() {
     lm INFO "Running smoke test for solo dev pr approve workflow."
-    bats test/smoke-test/.github/workflows/solo-dev-pr-approve/tests.bats
+    bats --verbose-run test/smoke-test/.github/workflows/solo-dev-pr-approve/tests.bats
 }
 
 main() {
