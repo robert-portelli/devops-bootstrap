@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# Filename: /test/smoke-test/.github/workflows/solo-dev-pr-approve/test_workflow.sh
+# Filename: /test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh
 # Description:
 # Purpose:
 # Usage:
-#   bash test/smoke-test/.github/workflows/solo-dev-pr-approve/test_workflow.sh [options]
+#   bash test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh [options]
 # Options:
 #   --log-level {DEBUG|INFO|WARNING|ERROR}  Set the logging level (default: INFO).
 #   --log-to-console                        Enable logging to the console (default: false).
