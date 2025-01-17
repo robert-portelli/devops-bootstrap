@@ -84,13 +84,14 @@ call_act() {
     validate_env
 
     # Log details for debugging
-    echo "Running 'gh act' for job: $job with event JSON: $event_json"
+    echo "Running 'gh act' for job: $job with event JSON: $event_path"
 
     # Call act
     run gh act \
         -W ".github/workflows/solo-dev-pr-approve.yaml" \
         -j "$job" \
-        -P "robertportelli/custom-image:latest" \
+        -P "robertportelli/my-custom-act-image:latest" \
+        --pull "false" \
         --env GH_TOKEN="$GH_TOKEN" \
         --eventpath "$event_path" \
         --secret AUTO_APPROVE_APP_ID="$AUTO_APPROVE_APP_ID" \
@@ -107,6 +108,16 @@ call_act() {
 @test "PR approved open" {
     call_act \
         "check-pr-readiness" \
-        "pr-approved-open.json" \
-        "true"
+        "pr-approved-open.json"
+        #"true"
+
+    # Validate the job's output
+    #[[ "$output" =~ "Repository Owner: robert-portelli" ]] || fail "Expected 'Repository Owner: robert-portelli' in output."
+    #[[ "$output" =~ "Triggered by: robert-portelli" ]] || fail "Expected 'Triggered by: robert-portelli' in output."
+
+    # Ensure the job exits successfully
+    #[[ "$status" -eq 0 ]] || fail "Job failed with exit status $status."
+    assert_output --partial " Success - Main Check out the repository"
+
+    assert_output --partial "Repository Owner: robert-portelli"
 }
