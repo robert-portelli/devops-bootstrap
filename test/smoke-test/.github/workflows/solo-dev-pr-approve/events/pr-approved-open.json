@@ -2,15 +2,15 @@
   "repository": {
     "owner": {
       "id": "U_kgDOCJF2kA",
-      "login": "robert-portelli"
+      "login": "nektos/act"
     }
   },
-  "author": "robert-portelli",
-  "actor": "robert-portelli",
+  "author": "nektos/act",
+  "actor": "nektos/act",
   "baseRefName": "main",
   "closed": false,
   "headRefName": "feature/pr-approval-status",
-  "headRepositoryOwner": "robert-portelli",
+  "headRepositoryOwner": "nektos/act",
   "mergeStateStatus": "CLEAN",
   "mergeable": "MERGEABLE",
   "number": 25,
