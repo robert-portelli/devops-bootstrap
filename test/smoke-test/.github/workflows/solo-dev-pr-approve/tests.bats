@@ -39,6 +39,8 @@
 #   Version: See repository tags or release notes.
 #   License: See repository license file (e.g., LICENSE.md)
 
+EVENTS_DIR=""
+
 function setup {
     echo "Setting up testing environment..."
     GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || {
@@ -46,6 +48,8 @@ function setup {
         exit 1
     }
     echo "Project root determined: $GIT_ROOT"
+    EVENTS_DIR="${GIT_ROOT}/test/smoke-test/.github/workflows/solo-dev-pr-approve/events"
+    echo "Events directory set to: $EVENTS_DIR"
     load "${GIT_ROOT}/test/test_helpers/_common_setup"
     _common_setup
 }
@@ -66,16 +70,15 @@ validate_env() {
     done
 
     # Validate event JSON file existence
-    if [[ ! -f "$event_json" ]]; then
-        echo "Error: Event JSON file '$event_json' does not exist." >&2
-        return 1
-    fi
+    [[ -f "$event_path" ]] || fail "Event JSON file not found: $event_path"
+
 }
 
 call_act() {
     local job="$1"
-    local event_json="$2"
+    local event_file="$2"
     local verbose="${3:-false}"
+    local event_path="${EVENTS_DIR}/${event_file}"
 
     # Validate environment and secrets
     validate_env
@@ -89,7 +92,7 @@ call_act() {
         -j "$job" \
         -P "robertportelli/custom-image:latest" \
         --env GH_TOKEN="$GH_TOKEN" \
-        --eventpath "$event_json" \
+        --eventpath "$event_path" \
         --secret AUTO_APPROVE_APP_ID="$AUTO_APPROVE_APP_ID" \
         --secret AUTO_APPROVE_PRIVATE_KEY="$AUTO_APPROVE_PRIVATE_KEY" \
         --secret PERSONAL_ACCESS_TOKEN="$PERSONAL_ACCESS_TOKEN" \
@@ -104,6 +107,6 @@ call_act() {
 @test "PR approved open" {
     call_act \
         "check-pr-readiness" \
-        "events/pr-approved-open.json" \
+        "pr-approved-open.json" \
         "true"
 }
