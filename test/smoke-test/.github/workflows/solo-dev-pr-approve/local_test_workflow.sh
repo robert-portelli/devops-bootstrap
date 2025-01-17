@@ -163,11 +163,14 @@ cleanup() {
 }
 
 run_tests() {
-    if [[ -n "$BATS_FLAGS" ]]; then
-        bats $BATS_FLAGS "${ASSETS[tests]}"
-    else
-        bats "${ASSETS[tests]}"
-    fi
+    (
+        export customimage="${ASSETS[imagepath]}"
+        if [[ -n "$BATS_FLAGS" ]]; then
+            bats $BATS_FLAGS "${ASSETS[tests]}"
+        else
+            bats "${ASSETS[tests]}"
+        fi
+    )
 }
 
 main() {
