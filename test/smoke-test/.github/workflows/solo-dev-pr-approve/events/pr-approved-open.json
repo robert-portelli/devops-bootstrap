@@ -1,0 +1,27 @@
+{
+  "repository": {
+    "owner": {
+      "id": "U_kgDOCJF2kA",
+      "login": "qrobert-portelli"
+    }
+  },
+  "author": "robert-portelli",
+  "actor": "robert-portelli",
+  "baseRefName": "main",
+  "closed": false,
+  "headRefName": "feature/pr-approval-status",
+  "headRepositoryOwner": "robert-portelli",
+  "mergeStateStatus": "CLEAN",
+  "mergeable": "MERGEABLE",
+  "number": 25,
+  "reviewDecision": "APPROVED",
+  "reviewRequests": [],
+  "reviews": [
+    {
+      "author": "auto-approve-prs",
+      "body": "User: robert-portelli issued 'gh workflow run solo-dev-pr-approve.yaml --field pr_number=25'.\nThis workflow determined that this PR is qualified for automatic approval.\nApproval has been granted by the installed GitHub App 'Auto Approve PRs' to satisfy branch protection rules requiring PR approval.",
+      "state": "APPROVED"
+    }
+  ],
+  "state": "OPEN"
+}
