@@ -2,16 +2,41 @@
 
 # Filename: /test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh
 # Description:
+#   This script serves as the local testing entry point for verifying the
+#   'solo-dev-pr-approve.yaml' GitHub Actions workflow. It facilitates the
+#   setup and execution of BATS (Bash Automated Testing System) tests with
+#   configurable logging and optional BATS-specific flags for debugging.
+#
 # Purpose:
+#   - Streamline local testing of GitHub Actions workflows.
+#   - Enable dynamic configuration of test environments and verbosity levels.
+#   - Integrate reusable components such as Docker, `act`, and BATS.
+#   - Facilitate debugging and validation of workflow logic by emulating
+#     GitHub Actions environment locally.
+#
 # Usage:
 #   bash test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh [options]
+#
 # Options:
 #   --log-level {DEBUG|INFO|WARNING|ERROR}  Set the logging level (default: INFO).
 #   --log-to-console                        Enable logging to the console (default: false).
+#   --bats-flags "<flags>"                  Pass additional flags to the BATS test framework.
+#                                           Supports multiple space-separated flags.
+#
+# Examples:
+#   # Run tests with DEBUG log level and additional BATS flags
+#   bash test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh \
+#       --log-level DEBUG \
+#       --bats-flags "--verbose-run --show-output-of-passing-tests"
+#
+#   # Run tests with default log level and no additional BATS flags
+#   bash test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh
+
 # Requirements:
 #   - Docker installed and running
 #   - `act` installed as gh extension and configured
 #   - GitHub repository must have the workflow files correctly placed
+#
 # Author: Robert Portelli
 # Repository: https://github.com/robert-portelli/devops-bootstrap
 # Version: See repository tags or release notes
