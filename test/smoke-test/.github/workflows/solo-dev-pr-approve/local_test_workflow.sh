@@ -115,7 +115,7 @@ assets_define() {
     git_repo=$(git rev-parse --show-toplevel)
 
     ASSETS[git_repo]="$git_repo"
-    ASSETS[workflow]="${git_repo}/.github/workflows/solo-dev-pr-approve.yaml"
+    ASSETS[tests]="${git_repo}/test/smoke-test/.github/workflows/solo-dev-pr-approve/tests.bats"
     ASSETS[imagename]="robertportelli/my-custom-act-image:latest"
     ASSETS[dockerimage]="ubuntu-latest=${ASSETS[imagename]}"
     ASSETS[imagepath]="${git_repo}/docker-custom-act/Dockerfile"
@@ -152,7 +152,7 @@ cleanup() {
 
 run_tests() {
     lm INFO "Running smoke test for solo dev pr approve workflow."
-    bats "${BATS_FLAGS[@]}" test/smoke-test/.github/workflows/solo-dev-pr-approve/tests.bats
+    bats "${BATS_FLAGS[@]}" ASSETS[tests]
 }
 
 main() {
