@@ -105,18 +105,24 @@ call_act() {
         $( [[ "$verbose" == "true" ]] && echo "--verbose" )
 }
 
-@test "true BATS smoke test" {
+@test "Smoke test this setup" {
     run true
-    [[ "$status" -eq 0 ]]
+    assert_success
 }
 
-@test "PR approved open" {
+@test "Check PR Readiness" {
     call_act \
         "check-pr-readiness" \
         "pr-approved-open.json"
         "true"
 
+    # act overwrites github.actor with it's own value.
+    # if your workflow uses workflow_dispatch and you want to perform a conditional
+    # using the value of github.actor, it will fail
+
     assert_output --partial "Success - Main Check out the repository"
-    assert_output --partial "Repository Owner: nektos/act"
-    refute_output --partial "Error: Only the repository owner can trigger this workflow."
+    assert_output --partial "Repository Owner: robert-portelli"
+    assert_output --partial "Triggered by: nektos/act"
+    assert_output --partial "Error: Only the repository owner can trigger this workflow."
+    assert_failure
 }
