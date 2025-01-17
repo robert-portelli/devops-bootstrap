@@ -102,7 +102,7 @@ call_act() {
         --secret AUTO_APPROVE_APP_ID="$AUTO_APPROVE_APP_ID" \
         --secret AUTO_APPROVE_PRIVATE_KEY="$AUTO_APPROVE_PRIVATE_KEY" \
         --secret PERSONAL_ACCESS_TOKEN="$PERSONAL_ACCESS_TOKEN" \
-        $( [[ "$verbose" == "true" ]] && echo "--verbose" )
+        "$( [[ "$verbose" == "true" ]] && echo "--verbose" )"
 }
 
 @test "Smoke test this setup" {
