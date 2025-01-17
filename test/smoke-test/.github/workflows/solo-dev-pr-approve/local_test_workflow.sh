@@ -164,7 +164,7 @@ cleanup() {
 
 run_tests() {
     (
-        export customimage="${ASSETS[imagepath]}"
+        export customimage="${ASSETS[dockerimage]}"
         if [[ -n "$BATS_FLAGS" ]]; then
             bats $BATS_FLAGS "${ASSETS[tests]}"
         else
