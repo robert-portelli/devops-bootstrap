@@ -114,15 +114,9 @@ call_act() {
     call_act \
         "check-pr-readiness" \
         "pr-approved-open.json"
-        #"true"
+        "true"
 
-    # Validate the job's output
-    #[[ "$output" =~ "Repository Owner: robert-portelli" ]] || fail "Expected 'Repository Owner: robert-portelli' in output."
-    #[[ "$output" =~ "Triggered by: robert-portelli" ]] || fail "Expected 'Triggered by: robert-portelli' in output."
-
-    # Ensure the job exits successfully
-    #[[ "$status" -eq 0 ]] || fail "Job failed with exit status $status."
-    assert_output --partial " Success - Main Check out the repository"
-
-    assert_output --partial "Repository Owner: robert-portelli"
+    assert_output --partial "Success - Main Check out the repository"
+    assert_output --partial "Repository Owner: nektos/act"
+    refute_output --partial "Error: Only the repository owner can trigger this workflow."
 }
