@@ -11,6 +11,8 @@
 #   - Streamline local testing of GitHub Actions workflows.
 #   - Enable dynamic configuration of test environments and verbosity levels.
 #   - Integrate reusable components such as Docker, `act`, and BATS.
+#   - Allow flexible passing of additional BATS flags for advanced debugging
+#     or output configuration.
 #   - Facilitate debugging and validation of workflow logic by emulating
 #     GitHub Actions environment locally.
 #
@@ -21,27 +23,33 @@
 #   --log-level {DEBUG|INFO|WARNING|ERROR}  Set the logging level (default: INFO).
 #   --log-to-console                        Enable logging to the console (default: false).
 #   --bats-flags "<flags>"                  Pass additional flags to the BATS test framework.
-#                                           Supports multiple space-separated flags.
+#                                           The flags should be enclosed in quotes if they contain spaces.
 #
 # Examples:
 #   # Run tests with DEBUG log level and additional BATS flags
 #   bash test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh \
+#       --log-to-console \
 #       --log-level DEBUG \
 #       --bats-flags "--verbose-run --show-output-of-passing-tests"
 #
 #   # Run tests with default log level and no additional BATS flags
 #   bash test/smoke-test/.github/workflows/solo-dev-pr-approve/local_test_workflow.sh
-
-# Requirements:
-#   - Docker installed and running
-#   - `act` installed as gh extension and configured
-#   - GitHub repository must have the workflow files correctly placed
 #
-# Author: Robert Portelli
-# Repository: https://github.com/robert-portelli/devops-bootstrap
-# Version: See repository tags or release notes
-# License: See repository license file (e.g., LICENSE.md)
-# Last Updated: See repository commit history (e.g., `git log`)
+# Requirements:
+#   - Docker installed and running.
+#   - `act` installed as a GitHub CLI extension and configured.
+#   - GitHub repository must have the workflow files correctly placed.
+#
+# Author:
+#   Robert Portelli
+#   Repository: https://github.com/robert-portelli/devops-bootstrap
+# Version:
+#   See repository tags or release notes.
+# License:
+#   See repository license file (e.g., LICENSE.md).
+# Last Updated:
+#   See repository commit history (e.g., `git log`).
+
 
 LOG_LEVEL="INFO"  # Default log level
 LOG_TO_CONSOLE=false  # Default: don't log to console
@@ -75,23 +83,27 @@ parse_arguments() {
                 ;;
             --bats-flags)
                 shift
-                while [[ "$#" -gt 0 && "$1" != --* ]]; do
-                    BATS_FLAGS+=("$1")
+                if [[ -n "$1" ]]; then
+                    BATS_FLAGS="$1"
                     shift
-                done
+                else
+                    echo "Error: No flags provided after --bats-flags."
+                    exit 1
+                fi
                 ;;
             --help|-h)
-                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console] [--bats-flags '<flag1> <flag2> ...']"
+                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console] [--bats-flags '<flags>']"
                 exit 0
                 ;;
             *)
                 echo "Unknown option: $1"
-                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console] [--bats-flags '<flag1> <flag2> ...']"
+                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console] [--bats-flags '<flags>']"
                 exit 1
                 ;;
         esac
     done
 }
+
 
 # Log message function
 lm() {
@@ -151,8 +163,11 @@ cleanup() {
 }
 
 run_tests() {
-    lm INFO "Running smoke test for solo dev pr approve workflow."
-    bats "${BATS_FLAGS[@]}" ASSETS[tests]
+    if [[ -n "$BATS_FLAGS" ]]; then
+        bats $BATS_FLAGS "${ASSETS[tests]}"
+    else
+        bats "${ASSETS[tests]}"
+    fi
 }
 
 main() {
