@@ -20,6 +20,7 @@
 
 LOG_LEVEL="INFO"  # Default log level
 LOG_TO_CONSOLE=false  # Default: don't log to console
+BATS_FLAGS=""
 
 # Define log levels
 declare -A LOG_LEVELS=(
@@ -29,7 +30,7 @@ declare -A LOG_LEVELS=(
     [ERROR]=3
 )
 
-# Parse arguments to set log level and log-to-console option
+# Parse arguments to set log level, log-to-console option, and bats flags
 parse_arguments() {
     while [[ "$#" -gt 0 ]]; do
         case "$1" in
@@ -37,6 +38,7 @@ parse_arguments() {
                 shift
                 if [[ -n "$1" ]] && [[ "${LOG_LEVELS[$1]}" ]]; then
                     LOG_LEVEL="$1"
+                    shift
                 else
                     echo "Invalid log level: $1. Valid options are: DEBUG, INFO, WARNING, ERROR."
                     exit 1
@@ -44,18 +46,25 @@ parse_arguments() {
                 ;;
             --log-to-console)
                 LOG_TO_CONSOLE=true
+                shift
+                ;;
+            --bats-flags)
+                shift
+                while [[ "$#" -gt 0 && "$1" != --* ]]; do
+                    BATS_FLAGS+=("$1")
+                    shift
+                done
                 ;;
             --help|-h)
-                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console]"
+                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console] [--bats-flags '<flag1> <flag2> ...']"
                 exit 0
                 ;;
             *)
                 echo "Unknown option: $1"
-                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console]"
+                echo "Usage: $0 [--log-level {DEBUG|INFO|WARNING|ERROR}] [--log-to-console] [--bats-flags '<flag1> <flag2> ...']"
                 exit 1
                 ;;
         esac
-        shift
     done
 }
 
@@ -118,7 +127,7 @@ cleanup() {
 
 run_tests() {
     lm INFO "Running smoke test for solo dev pr approve workflow."
-    bats --verbose-run test/smoke-test/.github/workflows/solo-dev-pr-approve/tests.bats
+    bats "${BATS_FLAGS[@]}" test/smoke-test/.github/workflows/solo-dev-pr-approve/tests.bats
 }
 
 main() {
