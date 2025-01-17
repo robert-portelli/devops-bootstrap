@@ -72,6 +72,9 @@ validate_env() {
     # Validate event JSON file existence
     [[ -f "$event_path" ]] || fail "Event JSON file not found: $event_path"
 
+    # Ensure `customimage` is available
+    [ -n "$customimage" ] || fail "customimage is not set."
+
 }
 
 call_act() {
@@ -90,10 +93,12 @@ call_act() {
     run gh act \
         -W ".github/workflows/solo-dev-pr-approve.yaml" \
         -j "$job" \
-        -P "robertportelli/my-custom-act-image:latest" \
+        -P "$customimage" \
         --pull "false" \
-        --env GH_TOKEN="$GH_TOKEN" \
         --eventpath "$event_path" \
+        --env GH_TOKEN="$(gh auth token)" \
+        --env GITHUB_TOKEN="$(gh auth token)" \
+        --secret GITHUB_TOKEN="$(gh auth token)" \
         --secret AUTO_APPROVE_APP_ID="$AUTO_APPROVE_APP_ID" \
         --secret AUTO_APPROVE_PRIVATE_KEY="$AUTO_APPROVE_PRIVATE_KEY" \
         --secret PERSONAL_ACCESS_TOKEN="$PERSONAL_ACCESS_TOKEN" \
